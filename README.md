@@ -67,4 +67,4 @@ PlayerBaseState
 ## 관련 링크
 
 * **포트폴리오 문서:** https://app.notion.com/p/3be1270d8f268061afa7d8716be25fa7
-* **시연 영상:** 연결 예정
+* **시연 영상:** https://youtu.be/CF7NiWzTbsY
