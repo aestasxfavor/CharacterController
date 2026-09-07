@@ -66,5 +66,5 @@ PlayerBaseState
 
 ## 관련 링크
 
-* **포트폴리오 문서:** https://app.notion.com/p/3be1270d8f268061afa7d8716be25fa7
+* **포트폴리오 문서:** https://river-goal-1ae.notion.site/3D-Character-Controller-3bf1270d8f2680f88036dcbada50ed4f
 * **시연 영상:** https://youtu.be/CF7NiWzTbsY
