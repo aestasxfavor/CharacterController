@@ -6,12 +6,12 @@ using UnityEngine;
 public class PlayerIdleState : PlayerBaseState
 {
     public PlayerIdleState(PlayerController _playerController, PlayerStateMachine _playerStateMachine)
-        : base(_playerController, _playerStateMachine) { }
+          : base(_playerController, _playerStateMachine) { }
 
     public override void Enter()
     {
         // Idle 진입 시 공중 / 착지 관련 Animator 값 초기화
-        playerController.PlayerAnimationController.SetFalling(false);
+        playerController.PlayerAnimationController.SetAirborne(false);
         playerController.PlayerAnimationController.SetLanding(false);
         playerController.PlayerAnimationController.SetMoveInput(false);
 
@@ -20,8 +20,8 @@ public class PlayerIdleState : PlayerBaseState
 
     public override void Update()
     {
-        // 지상 상태에서 접지가 끊기고 하강 속도 조건을 만족하면 FallState로 전환
-        if (ShouldFall())
+        // 일정 시간 이상 지면에 지지되지 않으면 FallState로 전환
+        if (playerController.ShouldStartFalling)
         {
             playerStateMachine.ChangeState(new PlayerFallState(playerController, playerStateMachine, true));
             return;
@@ -56,17 +56,6 @@ public class PlayerIdleState : PlayerBaseState
         }
     }
 
-    /// <summary>
-    /// 이전 프레임에는 지상에 있었지만 현재 접지가 끊긴 상황인지 확인
-    /// 점프 중이 아닌 상태에서 하강 속도가 기준 이하일 때 낙하로 판단
-    /// </summary>
-    private bool ShouldFall()
-    {
-        return playerController.WasGrounded
-            && !playerController.GroundDetector.IsGrounded
-            && !playerController.JumpController.IsJumping
-            && playerController.JumpController.VerticalVelocity <= playerController.FallThreshold;
-    }
 
 
     public override void Exit()

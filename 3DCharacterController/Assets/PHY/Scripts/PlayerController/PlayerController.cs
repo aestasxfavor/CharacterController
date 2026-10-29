@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// 2026-04-21
-/// 리지드바디 기반 컨트롤러에서 캐릭터 컨트롤러 + 리지드바디 일부를 사용한 캐릭터 컨트롤러 제작 예정
-/// </summary>
 public class PlayerController : MonoBehaviour
 {
     [Header("Components")]
@@ -22,7 +18,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private PlayerStateMachine playerStateMachine;
 
     [Header("Air State")]
-    [SerializeField] private float fallThreshold = -0.5f;
+    // 지면에 지지되지 않은 상태가 이 시간(초) 이상 이어지면 낙하로 판단
+    // 모서리나 작은 턱에서 접지가 한두 프레임 끊기는 경우를 걸러내는 유예 시간
+    [SerializeField] private float fallEnterDelay = 0.08f;
 
     [Header("Debug")]
     [SerializeField] private bool showDebugLog = true;
@@ -35,7 +33,11 @@ public class PlayerController : MonoBehaviour
     public GroundDetector GroundDetector => groundDetector;
     public HighFallDetector HighFallDetector => highFallDetector;
 
-    public float FallThreshold => fallThreshold;
+    // 마지막으로 지면에 지지된 이후 경과 시간 (지지 중이면 0)
+    public float UnsupportedTime { get; private set; }
+
+    // 점프 중이 아니고 일정 시간 이상 지지받지 못하면 낙하로 판단 (Idle / Move 공용)
+    public bool ShouldStartFalling => !jumpController.IsJumping && UnsupportedTime >= fallEnterDelay;
 
     public float JumpStartY => jumpStartY;
     private float jumpStartY;
@@ -107,7 +109,7 @@ public class PlayerController : MonoBehaviour
 
         playerAnimationController.SetMoveInput(hasMoveInput);
 
-        Vector3 horizontalMove = movementController.GetHorizontalMove(moveDirection, Time.deltaTime, 
+        Vector3 horizontalMove = movementController.GetHorizontalMove(moveDirection, Time.deltaTime,
             groundDetector.IsGrounded, isRunPressed);
 
         Vector3 finalMove = horizontalMove;
@@ -124,10 +126,27 @@ public class PlayerController : MonoBehaviour
         // FallState의 착지 전이 기준으로 사용한다.
         ControllerGroundedAfterMove = hitBelow && groundDetector.IsGrounded;
 
+        UnsupportedTime = IsSupportedByGround() ? 0f : UnsupportedTime + Time.deltaTime;
+
         if (hasMoveInput && groundDetector.IsGrounded)
         {
             movementController.Rotate(transform, moveDirection, Time.deltaTime);
         }
+    }
+
+    /// <summary>
+    /// 현재 지면에 지지되고 있는지 판단
+    /// GroundDetector가 접지로 보면 지지 중이고,
+    /// 감지기가 지면을 못 찾았거나 걸을 수 있는 경사인데도 CharacterController가 접지라고 하면 지지 중으로 취급
+    /// (걸을 수 없는 급경사 위에서는 CharacterController 접지를 인정하지 않음)
+    /// </summary>
+    private bool IsSupportedByGround()
+    {
+        if (groundDetector.IsGrounded) return true;
+
+        if (!characterController.isGrounded) return false;
+
+        return !groundDetector.HasGroundHit || groundDetector.IsWalkableSlope;
     }
 
     public void SetJumpStartY(float value)

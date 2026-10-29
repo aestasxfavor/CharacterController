@@ -10,7 +10,7 @@ public class PlayerAnimationController : MonoBehaviour
 
     private readonly int SpeedHash = Animator.StringToHash("Speed");
     private readonly int YSpeedHash = Animator.StringToHash("YSpeed");
-    private readonly int IsFallingHash = Animator.StringToHash("IsFalling");
+    private readonly int IsAirborneHash = Animator.StringToHash("IsAirborne");
     private readonly int IsGroundedHash = Animator.StringToHash("IsGrounded");
     private readonly int IsLandingHash = Animator.StringToHash("IsLanding");
     private readonly int HasMoveInputHash = Animator.StringToHash("HasMoveInput");
@@ -76,11 +76,10 @@ public class PlayerAnimationController : MonoBehaviour
         animator.SetBool(IsGroundedHash, value);
     }
 
-    public void SetFalling(bool value)
+ public void SetAirborne(bool value)
     {
         if(animator == null) return;
-        Debug.Log($"SetFalling »£√‚µ : {value}");
-        animator.SetBool(IsFallingHash, value);
+        animator.SetBool(IsAirborneHash, value);
     }
 
     public void SetLanding(bool value)

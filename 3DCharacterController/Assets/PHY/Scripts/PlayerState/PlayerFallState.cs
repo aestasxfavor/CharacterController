@@ -1,152 +1,104 @@
 using UnityEngine;
 
 /// <summary>
-/// 플레이어가 공중에서 하강 중일 때의 상태
-/// Falling 모션 시작 여부와 착지 후 LandingState 진입 여부를 판단
+/// 공중에서 하강 중인 상태
+/// Airborne 모션 시작 시점과 착지 연출 여부를 판단
 /// </summary>
 public class PlayerFallState : PlayerBaseState
 {
-    private bool LandingDone;
-    private bool hasPlayedFalling;
+    private const float AirborneDelay = 0.12f;   // 접지가 끊긴 뒤 공중 모션까지 유예
+    private const float LandCheckDelay = 0.05f;  // 진입 직후 이전 프레임 접지 정보 무시
 
-    // 높은 낙하 진입 시 Falling 모션을 즉시 시작할지 판단하기 위한 값
-    // 현재는 낮은 단차 오작동 가능성 때문에 즉시 재생 구조는 보류
-    private bool startFallMotion;
-
-    // 낙하 지속 시간과 낙하 중 가장 낮았던 Y속도 기록
+    private bool landingDone;
+    private bool hasShownAirborne;
     private float fallTimer;
-    private float lowYSpeed;
 
-    // 높은 낙하 판정 기준
-    // 현재 값은 테스트 기준이며 최종 감각 조정 여지 있음 => 보류 변수
-    //private const float HighFallTime = 0.35f;
-    //private const float HighFallSpeed = -4f;
-
-    // Falling 모션 시작 기준
-    // FallState 진입 직후 바로 재생하지 않고 일정 시간과 하강 속도를 확인
-    private float FallMotionDelay = 0.12f;
-    private float FallMotionSpeed = -2.5f;
-
+    private float debugTimer;   // 밑 디버그에 dist가 infinity로 나옴 추후에 해결해야할 또 다른 문제
+    // 세 번째 인자는 기존 호출부(Idle/Move/Jump) 호환용, 현재 사용하지 않음
     public PlayerFallState(PlayerController _playerController, PlayerStateMachine _playerStateMachine, bool _startFallMotion)
-        : base(_playerController, _playerStateMachine)
-    {
-        startFallMotion = _startFallMotion;
-    }
+        : base(_playerController, _playerStateMachine) { }
 
     public override void Enter()
     {
-        LandingDone = false;
-        hasPlayedFalling = false;
-
+        landingDone = false;
+        hasShownAirborne = false;
         fallTimer = 0f;
-        lowYSpeed = playerController.JumpController.VerticalVelocity;
 
-        // 이전 상태에서 남아 있을 수 있는 공중 / 착지 애니메이션 값 초기화
+        debugTimer = 0f;
+
         playerController.PlayerAnimationController.SetLanding(false);
-        playerController.PlayerAnimationController.SetFalling(false);
+        playerController.PlayerAnimationController.SetAirborne(false);
 
-        Debug.Log("fall enter");
-
-        // Falling 모션 즉시 재생은 낮은 단차에서도 발동될 수 있어 현재 비활성화
-        // 추후 낙하 높이 / Y속도 / 지면 거리 기준으로 재검토
-        //if (startFallMotion)
-        //{
-        //    StartFallingAnimation();
-        //}
-
-        // 높은 낙하 판정을 위해 FallState 진입 시점의 Y속도 기록 시작
-        playerController.HighFallDetector.StartFall(playerController.JumpController.VerticalVelocity);
+        playerController.HighFallDetector.StartFall(playerController.transform.position.y);
     }
 
     public override void Update()
     {
         fallTimer += Time.deltaTime;
 
-        // 낙하 중 가장 낮은 Y속도 기록
-        lowYSpeed = Mathf.Min(lowYSpeed, playerController.JumpController.VerticalVelocity);
-
-        // 낙하 시간과 Y속도를 기준으로 높은 낙하 여부 갱신
-        playerController.HighFallDetector.CheckHighFall(Time.deltaTime, playerController.JumpController.VerticalVelocity);
-
-        // Falling 모션이 아직 재생되지 않았고 조건을 만족하면 Falling 모션 시작
-        if (!hasPlayedFalling && ShouldStartFallingMotion())
+        if (!hasShownAirborne)
         {
-            StartFallingAnimation();
+            debugTimer += Time.deltaTime;
+            if (debugTimer >= 0.1f)
+            {
+                debugTimer = 0f;
+                var g = playerController.GroundDetector;
+                Debug.Log($"[FallDebug] t={fallTimer:F2} dist={g.DistanceToGround:F2} hit={g.HasGroundHit} dropped={playerController.HighFallDetector.FallDistance:F2} input={playerController.InputHandler.Movement}");
+            }
         }
 
-        // FallState 진입 직후에는 이전 프레임의 접지 정보가 남을 수 있어 짧게 대기
-        if (fallTimer < 0.05f) return;
+        playerController.HighFallDetector.UpdateFall(playerController.transform.position.y);
 
-        // CharacterController.Move 이후 바닥 충돌이 있었으면 착지 처리
+        if (!hasShownAirborne && ShouldShowAirborne())
+        {
+            hasShownAirborne = true;
+            playerController.PlayerAnimationController.SetAirborne(true);
+        }
+
+        if (fallTimer < LandCheckDelay) return;
+
         if (playerController.ControllerGroundedAfterMove)
         {
             Land();
-            return;
         }
     }
 
-    private void StartFallingAnimation()
+    // 접지가 끊긴 뒤 일정 시간이 지났고, 아래 땅이 충분히 멀 때만 공중 모션 시작
+    private bool ShouldShowAirborne()
     {
-        hasPlayedFalling = true;
+        if (fallTimer < AirborneDelay) return false;
 
-        playerController.PlayerAnimationController.SetFalling(true);
-    }
-
-    /// <summary>
-    /// Falling 모션을 시작할지 판단
-    /// FallState 진입 직후, 지면과 너무 가까운 상황, 하강 속도가 부족한 상황에서는 재생하지 않음
-    /// </summary>
-    private bool ShouldStartFallingMotion()
-    {
-        if (fallTimer < FallMotionDelay) return false;
-
-        // TODO: HasGroundHit 기준이 넓으면 높은 낙하 중 Falling 모션이 막힐 수 있음
-        // 추후 DistanceToGround 기준으로 교체 검토
-        if (playerController.GroundDetector.HasGroundHit) return false;
-
-        return lowYSpeed <= FallMotionSpeed;
+        return playerController.GroundDetector.DistanceToGround
+               > playerController.HighFallDetector.AirborneGroundDistance;
     }
 
     private void Land()
     {
-        if (LandingDone) return;
+        if (landingDone) return;
+        landingDone = true;
 
-        LandingDone = true;
-
-        // HighFallDetector 결과와 실제 Falling 모션 재생 여부를 함께 사용해 착지 연출 판단
         bool wasHighFall = playerController.HighFallDetector.GetResultAndReset();
-        bool shouldPlayLandingMotion = wasHighFall || hasPlayedFalling;
+        bool playLandMotion = wasHighFall || hasShownAirborne;
 
-        playerController.PlayerAnimationController.SetFalling(false);
+        playerController.PlayerAnimationController.SetAirborne(false);
 
-        // 높은 낙하 또는 Falling 모션이 재생된 경우에만 LandingState로 진입
-        if (shouldPlayLandingMotion)
+        if (playLandMotion)
         {
             playerStateMachine.ChangeState(new PlayerLandState(playerController, playerStateMachine));
-
             return;
         }
 
-        // 낮은 단차나 짧은 하강은 착지 연출 없이 바로 지상 상태로 복귀
         playerController.PlayerAnimationController.SetLanding(false);
         ChangeToIdleOrMove();
     }
 
     private void ChangeToIdleOrMove()
     {
-        // 착지 후 이동 입력 여부에 따라 Idle 또는 Move로 복귀
         if (playerController.InputHandler.Movement.sqrMagnitude > 0.01f)
-        {
             playerStateMachine.ChangeState(new PlayerMoveState(playerController, playerStateMachine));
-        }
         else
-        {
             playerStateMachine.ChangeState(new PlayerIdleState(playerController, playerStateMachine));
-        }
     }
 
-    public override void Exit()
-    {
-        Debug.Log("falling exit");
-    }
+    public override void Exit() { }
 }

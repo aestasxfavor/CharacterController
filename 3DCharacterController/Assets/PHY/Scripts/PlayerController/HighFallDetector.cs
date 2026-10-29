@@ -1,74 +1,42 @@
+using Unity.VisualScripting;
 using UnityEngine;
 /// <summary>
-/// 낙하 시간과 최저 Y속도를 기준으로 높은 낙하 여부를 판단하는 보조 클래스
-/// FallState에서 착지 연출 여부를 결정할 때 사용함
+/// 낙하 거리(최고점 Y - 현재 Y)를 기록하고 착지 모션 여부를 판단
+/// Airborne 시작 기준(아래 땅까지의 거리)도 Inspector에서 함께 조정
 /// </summary>
 public class HighFallDetector : MonoBehaviour
 {
-    [Header("High Fall Check")]
-    [SerializeField] private float highFallTime = 0.35f;
-    [SerializeField] private float highFallSpeed = -4f;
+    [Header("Airborne Motion")]
+    // 아래 땅까지의 거리가 이 값보다 멀 때만 Airborne 모션 시작
+    // GroundDectector의 maxGroundCheckDistance(1.0)보다 크면 의미가 없음
+    [SerializeField] private float airborneGroundDistance = 1.0f;
 
-    /// <summary>
-    /// 현재 낙하가 지속된 시간
-    /// </summary>
-    public float FallTimer { get; private set; }
+    [Header("Land Motion")]
+    // 이 거리 이상 떨어졌으면 착지 모션 발생
+    [SerializeField] private float landMotionDistance = 1.2f;
 
-    /// <summary>
-    /// 낙하 중 기록된 가장 낮은 Y 속도
-    /// </summary>
-    public float LowYSpeed { get; private set; }
-
-    /// <summary>
-    ///  현재 낙하가 높은 낙하로 판정됐는지 여부
-    /// </summary>
-    public bool IsHighFall { get; private set; }
+    public float AirborneGroundDistance => airborneGroundDistance;
+    public float PeakY { get; private set; }
+    public float FallDistance { get; private set; }
+    public bool IsHighFall => FallDistance >= landMotionDistance;
 
     private bool isTracking;
 
-    /// <summary>
-    /// FallState 진입 시 높은 낙하와 판정을 위한 기록 시작
-    /// </summary>
-    /// <param name="currentYSpeed">FallState 진입 시점의 Y속도</param>
-    public void StartFall(float currentYSpeed)
+    public void StartFall(float currentY)
     {
         isTracking = true;
-        FallTimer = 0f;
-        LowYSpeed = currentYSpeed;
-        IsHighFall = false;
-
-        Debug.Log("HighFallDetector StartFall");
+        PeakY = currentY;
+        FallDistance = 0f;
     }
 
-    /// <summary>
-    /// 낙하 중 시간과 최저 Y속도를 갱신하고 높은 낙하인지 판단
-    /// </summary>
-    /// <param name="deltaTime">프레임 보정 시간</param>
-    /// <param name="currentYSpeed">현재 Y속도</param>
-    public void CheckHighFall(float deltaTime, float currentYSpeed)
+    public void UpdateFall(float currentY)
     {
         if (!isTracking) return;
 
-        FallTimer += deltaTime;
-
-        // 낙하 중 가장 낮은 Y속도 기록
-        if (currentYSpeed < LowYSpeed)
-        {
-            LowYSpeed = currentYSpeed;
-        }
-
-        // 일정 시간 이상 낙하했고 하강 속도가 빠르면 높은 낙하로 판단
-        if (!IsHighFall && FallTimer >= highFallTime && LowYSpeed <= highFallSpeed)
-        {
-            IsHighFall = true;
-            Debug.Log("HighFallDetector isHighFalling true");
-        }
+        if (currentY > PeakY) PeakY = currentY;
+        FallDistance = PeakY - currentY;
     }
 
-    /// <summary>
-    /// 높은 낙하 판정 결과를 반환한 뒤 내부 상태 초기화
-    /// </summary>
-    /// <returns>높은 낙하 판정 결과</returns>
     public bool GetResultAndReset()
     {
         bool result = IsHighFall;
@@ -76,14 +44,10 @@ public class HighFallDetector : MonoBehaviour
         return result;
     }
 
-    /// <summary>
-    /// 높은 낙하 판정에 사용한 누적값 초기화
-    /// </summary>
     public void ResetFall()
     {
         isTracking = false;
-        FallTimer = 0f;
-        LowYSpeed = 0f;
-        IsHighFall = false;
+        PeakY = 0f;
+        FallDistance = 0f;
     }
 }

@@ -23,7 +23,7 @@ public class PlayerLandState : PlayerBaseState
         landingTimer = 0f;
 
         // 착지 상태 진입 시 Falling은 끄고 Landing 모션 활성화
-        playerController.PlayerAnimationController.SetFalling(false);
+        playerController.PlayerAnimationController.SetAirborne(false);
         playerController.PlayerAnimationController.SetLanding(true);
 
         Debug.Log("landing enter");
@@ -57,7 +57,7 @@ public class PlayerLandState : PlayerBaseState
     {
         // 착지 상태 종료 시 공중 / 착지 애니메이션 값 정리
         playerController.PlayerAnimationController.SetLanding(false);
-        playerController.PlayerAnimationController.SetFalling(false);
+        playerController.PlayerAnimationController.SetAirborne(false);
 
         Debug.Log("landing exit");
     }
