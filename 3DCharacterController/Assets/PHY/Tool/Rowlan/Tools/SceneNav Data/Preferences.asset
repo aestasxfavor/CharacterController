@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a97859eb634b9346bc45db2a35e86b7, type: 3}
+  m_Name: Preferences
+  m_EditorClassIdentifier: Rowlan.SceneNav.Editor::Rowlan.SceneNav.SceneNavData
+  helpBoxVisible: 0
+  assetEnabled: 1
+  presets:
+  - name: Preset 1
+    labelVisible: 1
+    zoomOutDistance: -50
+    previewPosition: 0
+    cameraOffset: -10
+    renderTextureSize: 200
+  - name: Preset 2
+    labelVisible: 1
+    zoomOutDistance: -100
+    previewPosition: 0
+    cameraOffset: -15
+    renderTextureSize: 200
+  - name: Preset 3
+    labelVisible: 1
+    zoomOutDistance: -150
+    previewPosition: 0
+    cameraOffset: -15
+    renderTextureSize: 200

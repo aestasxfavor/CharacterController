@@ -14,6 +14,7 @@ public class PlayerAnimationController : MonoBehaviour
     private readonly int IsGroundedHash = Animator.StringToHash("IsGrounded");
     private readonly int IsLandingHash = Animator.StringToHash("IsLanding");
     private readonly int HasMoveInputHash = Animator.StringToHash("HasMoveInput");
+    private readonly int MotionStateHash = Animator.StringToHash("MotionState");
 
     private void Reset()
     {
@@ -31,12 +32,12 @@ public class PlayerAnimationController : MonoBehaviour
         if (jumpController == null) jumpController = GetComponent<JumpController>();
         if (movementController == null) movementController = GetComponent<MovementController>();
         if (animator == null) animator = GetComponent<Animator>();
-       
+
     }
 
     private void Update()
     {
-        if(!IsAnimationReady()) return;
+        if (!IsAnimationReady()) return;
 
         UpdateMoveSpeed();
 
@@ -46,7 +47,7 @@ public class PlayerAnimationController : MonoBehaviour
 
     private void UpdateMoveSpeed()
     {
-        if(movementController.RunSpeed <= 0f)
+        if (movementController.RunSpeed <= 0f)
         {
             SetSpeed(0f);
             return;
@@ -64,6 +65,15 @@ public class PlayerAnimationController : MonoBehaviour
         animator.SetFloat(SpeedHash, value, 0.05f, Time.deltaTime);
     }
 
+    public PlayerMotion CurrentMotion { get; private set; }
+
+    public void SetMotion(PlayerMotion motion)
+    {
+        CurrentMotion = motion;
+        if (animator == null) return;
+        animator.SetInteger(MotionStateHash, (int)motion);
+    }
+
     public void SetYSpeed(float value)
     {
         if (animator == null) return;
@@ -76,9 +86,9 @@ public class PlayerAnimationController : MonoBehaviour
         animator.SetBool(IsGroundedHash, value);
     }
 
- public void SetAirborne(bool value)
+    public void SetAirborne(bool value)
     {
-        if(animator == null) return;
+        if (animator == null) return;
         animator.SetBool(IsAirborneHash, value);
     }
 

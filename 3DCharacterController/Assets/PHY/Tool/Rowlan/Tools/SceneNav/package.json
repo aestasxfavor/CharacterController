@@ -1,0 +1,17 @@
+{
+  "name": "com.rowlan.scenenav",
+  "displayName": "SceneNav",
+  "version": "2.6.0",
+  "author": {
+	"name": "Rowlan",
+	"email": "",
+	"url": ""
+  },    
+  "unity": "2022.3",
+  "description": "SceneNav is a Unity Editor extension which allows you to quickly navigate around in scenes. It's especially very handy to move around on large terrains.",
+  "keywords": [
+    "Editor Tools"
+  ],
+  "category": "Scripts",
+  "type": "tool"
+}

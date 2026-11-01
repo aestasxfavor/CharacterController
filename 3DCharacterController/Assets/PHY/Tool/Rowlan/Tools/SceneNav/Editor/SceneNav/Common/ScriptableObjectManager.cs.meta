@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: b7b6349e7d4bdbc48b702430d1193d34
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 244969
+  packageName: SceneNav - Smooth & Fast Scene Navigation - FREE
+  packageVersion: 2.6.0
+  assetPath: Assets/Rowlan/Tools/SceneNav/Editor/SceneNav/Common/ScriptableObjectManager.cs
+  uploadId: 926406

@@ -14,6 +14,7 @@ public class PlayerIdleState : PlayerBaseState
         playerController.PlayerAnimationController.SetAirborne(false);
         playerController.PlayerAnimationController.SetLanding(false);
         playerController.PlayerAnimationController.SetMoveInput(false);
+        playerController.PlayerAnimationController.SetMotion(PlayerMotion.Locomotion);
 
         Debug.Log("idle enter");
     }
@@ -23,7 +24,7 @@ public class PlayerIdleState : PlayerBaseState
         // 일정 시간 이상 지면에 지지되지 않으면 FallState로 전환
         if (playerController.ShouldStartFalling)
         {
-            playerStateMachine.ChangeState(new PlayerFallState(playerController, playerStateMachine, true));
+            playerStateMachine.ChangeState(new PlayerFallState(playerController, playerStateMachine, false));
             return;
         }
 
@@ -35,14 +36,12 @@ public class PlayerIdleState : PlayerBaseState
 
         if (canJump)
         {
-            // 점프 시작 높이 기록 후 JumpController에서 수직 속도 처리
-            playerController.SetJumpStartY(playerController.transform.position.y);
-            playerController.JumpController.TryJump(true);
-
+            // 제자리 점프는 웅크림(PreJump)부터 시작
+            // 실제 점프 시작(수직 속도 적용)은 JumpState가 담당함
             // 점프 입력은 1회성 입력으로 사용한 뒤 초기화
             playerController.InputHandler.ResetJumpInput();
 
-            playerStateMachine.ChangeState(new PlayerJumpState(playerController, playerStateMachine));
+            playerStateMachine.ChangeState(new PlayerJumpState(playerController, playerStateMachine, true));
 
             return;
         }
@@ -63,5 +62,3 @@ public class PlayerIdleState : PlayerBaseState
         Debug.Log("idle exit");
     }
 }
-
-

@@ -2365,7 +2365,7 @@ Animator:
   m_GameObject: {fileID: 4301659692598567666}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: e69572209ceba9c4185d1b93d78ab6bb, type: 3}
-  m_Controller: {fileID: 9100000, guid: d888d02e9a2348d40b549a241d13e83a, type: 2}
+  m_Controller: {fileID: 9100000, guid: 3663cab11d89aa7448db142109a63340, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -2685,13 +2685,13 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 2
-  m_Radius: 0.5
+  m_Height: 1.6
+  m_Radius: 0.2
   m_SlopeLimit: 42
   m_StepOffset: 0.2
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 1, z: 0}
+  m_Center: {x: 0, y: 0.8, z: 0}
 --- !u!1 &2914148677969117895
 GameObject:
   m_ObjectHideFlags: 0
@@ -2951,7 +2951,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   characterController: {fileID: 0}
-  maxGroundCheckDistance: 1
+  maxGroundCheckDistance: 2.5
   groundedDistance: 0.2
   landingCheckDistance: 0.08
   probeRadiusScale: 0.9

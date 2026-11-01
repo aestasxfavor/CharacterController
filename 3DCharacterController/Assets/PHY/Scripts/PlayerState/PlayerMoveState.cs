@@ -15,6 +15,7 @@ public class PlayerMoveState : PlayerBaseState
         playerController.PlayerAnimationController.SetAirborne(false);
         playerController.PlayerAnimationController.SetLanding(false);
         playerController.PlayerAnimationController.SetMoveInput(true);
+        playerController.PlayerAnimationController.SetMotion(PlayerMotion.Locomotion);
         Debug.Log("move enter");
     }
 
@@ -23,7 +24,7 @@ public class PlayerMoveState : PlayerBaseState
         // 일정 시간 이상 지면에 지지되지 않으면 FallState로 전환
         if (playerController.ShouldStartFalling)
         {
-            playerStateMachine.ChangeState(new PlayerFallState(playerController, playerStateMachine, true));
+            playerStateMachine.ChangeState(new PlayerFallState(playerController, playerStateMachine, false));
             return;
         }
 
@@ -36,14 +37,12 @@ public class PlayerMoveState : PlayerBaseState
         {
             Debug.Log("move -> jump 전이");
 
-            // 점프 시작 높이 기록 후 JumpController에서 수직 속도 처리
-            playerController.SetJumpStartY(playerController.transform.position.y);
-            playerController.JumpController.TryJump(true);
-
+            // 이동 중 점프는 웅크림 없이 바로 도약
+            // 실제 점프 시작(수직 속도 적용)은 JumpState가 담당함
             // 점프 입력은 1회성 입력으로 사용한 뒤 초기화
             playerController.InputHandler.ResetJumpInput();
 
-            playerStateMachine.ChangeState(new PlayerJumpState(playerController, playerStateMachine));
+            playerStateMachine.ChangeState(new PlayerJumpState(playerController, playerStateMachine, false));
             return;
         }
 

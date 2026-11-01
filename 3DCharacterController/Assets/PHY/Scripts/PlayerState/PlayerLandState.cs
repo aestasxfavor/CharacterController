@@ -25,6 +25,7 @@ public class PlayerLandState : PlayerBaseState
         // 착지 상태 진입 시 Falling은 끄고 Landing 모션 활성화
         playerController.PlayerAnimationController.SetAirborne(false);
         playerController.PlayerAnimationController.SetLanding(true);
+        playerController.PlayerAnimationController.SetMotion(PlayerMotion.Land);
 
         Debug.Log("landing enter");
     }
