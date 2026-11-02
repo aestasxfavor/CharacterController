@@ -32,7 +32,7 @@ public class PlayerJumpState : PlayerBaseState
 
         if (usePreJump)
         {
-            playerController.PlayerAnimationController.SetMotion(PlayerMotion.PreJump);
+            playerController.PlayerAnimationController.SetMotion(PlayerMotion.Jump);
         }
         else
         {

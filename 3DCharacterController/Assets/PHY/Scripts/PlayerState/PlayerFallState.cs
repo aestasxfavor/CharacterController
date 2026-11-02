@@ -78,7 +78,7 @@ public class PlayerFallState : PlayerBaseState
         if (inAirActive && !preLandShown && ShouldShowPreLand())
         {
             preLandShown = true;
-            playerController.PlayerAnimationController.SetMotion(PlayerMotion.PreLand);
+            playerController.PlayerAnimationController.SetMotion(PlayerMotion.Land);
         }
 
         if (fallTimer < LandCheckDelay) return;

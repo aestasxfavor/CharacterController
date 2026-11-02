@@ -2815,7 +2815,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1af9085de10ffd0428fa0aa19346032f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpPower: 6
+  jumpPower: 6.5
   gravityScale: 1.5
   maxFallSpeed: 20
   groundStickVelocity: -0.5
