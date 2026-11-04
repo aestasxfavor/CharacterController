@@ -50,14 +50,6 @@ public class PlayerController : MonoBehaviour
     private void Reset()
     {
         FindRefernces();
-        //characterController = GetComponent<CharacterController>();
-        //inputHandler = GetComponent<InputHandler>();
-        //movementController = GetComponent<MovementController>();
-        //jumpController = GetComponent<JumpController>();
-        //groundDetector = GetComponent<GroundDetector>();
-        //highFallDetector = GetComponent<HighFallDetector>();
-        //playerAnimationController = GetComponent<PlayerAnimationController>();
-        //playerStateMachine = GetComponent<PlayerStateMachine>();
     }
 
     private void Awake()
@@ -90,8 +82,6 @@ public class PlayerController : MonoBehaviour
         wasGrounded = groundDetector.IsGrounded;
 
         groundDetector.CheckGround();
-
-      
 
         // JumpController의 수직 속도 보정은 착지 반응이 즉시 필요하므로
         // Raycast 기반 GroundDetector가 아닌 CharacterController의 접지 판정을 사용한다.
@@ -130,10 +120,10 @@ public class PlayerController : MonoBehaviour
 
         UnsupportedTime = IsSupportedByGround() ? 0f : UnsupportedTime + Time.deltaTime;
 
-        if (hasMoveInput)
-        {
-            Debug.Log($"IsGrounded: {groundDetector.IsGrounded}");
-        }
+        //if (hasMoveInput)
+        //{
+        //    Debug.Log($"IsGrounded: {groundDetector.IsGrounded}");
+        //}
 
         if (hasMoveInput && groundDetector.IsGrounded)
         {

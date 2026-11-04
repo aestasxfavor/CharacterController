@@ -1,24 +1,29 @@
+
 using UnityEngine;
+
 /// <summary>
 /// 플레이어 점프 구간을 처리하는 상태
-/// 순서: (PreJump 웅크림) → Jump 도약 → 상승 → 정점에서 FallState로 전환
-/// 제자리 점프는 웅크린 뒤 실제로 뜨고, 이동 중 점프는 웅크림 없이 바로 뜬다
+/// 제자리 점프는 Jump → InAir → Land를 유지한다.
+/// 이동 중 점프는 Run_Jump를 유지하고 실제 접지 시 지상 상태로 복귀한다.
 /// </summary>
 public class PlayerJumpState : PlayerBaseState
 {
-    // 웅크리기 시작해서 실제로 땅을 박차기까지의 시간 (PreJump 클립은 0.40초, 눈으로 보며 조절)
+    // 웅크리기 시작해서 실제로 땅을 박차기까지의 시간
     private const float PreJumpDuration = 0.15f;
 
     private readonly bool usePreJump;
 
-    // 웅크림이 끝나고 수직 속도를 적용했는지
+    // 실제로 점프를 시작했는지 여부
     private bool jumpStarted;
     private float preJumpTimer;
 
-    // 점프 직후 접지 판정이 잠깐 남는 경우를 구분하기 위한 값
+    // 점프 후 지면을 벗어났는지 여부
     private bool hasLeftGround;
 
-    public PlayerJumpState(PlayerController _playerController, PlayerStateMachine _playerStateMachine, bool _usePreJump)
+    public PlayerJumpState(
+        PlayerController _playerController,
+        PlayerStateMachine _playerStateMachine,
+        bool _usePreJump)
         : base(_playerController, _playerStateMachine)
     {
         usePreJump = _usePreJump;
@@ -42,16 +47,18 @@ public class PlayerJumpState : PlayerBaseState
 
     public override void Update()
     {
-        // 웅크리는 동안: 시간이 차면 점프 시작, 그 전에 바닥이 사라지면 낙하로 전환
+        // 웅크리는 동안 처리
         if (!jumpStarted)
         {
             if (playerController.ShouldStartFalling)
             {
-                playerStateMachine.ChangeState(new PlayerFallState(playerController, playerStateMachine, false));
+                playerStateMachine.ChangeState(
+                    new PlayerFallState(playerController, playerStateMachine, false));
                 return;
             }
 
             preJumpTimer += Time.deltaTime;
+
             if (preJumpTimer >= PreJumpDuration)
             {
                 StartJump();
@@ -63,43 +70,57 @@ public class PlayerJumpState : PlayerBaseState
         bool isGrounded = playerController.GroundDetector.IsGrounded;
         float ySpeed = playerController.JumpController.VerticalVelocity;
 
-        // 점프 후 실제로 지면을 벗어났는지 확인하기 위한 로직
+        // 실제 지면 이탈 여부 확인
         if (!isGrounded)
         {
             hasLeftGround = true;
         }
 
-        // 지면을 벗어난 뒤 Y속도가 0 이하가 되면 하강 구간으로 판단
-        if (hasLeftGround && !isGrounded && ySpeed <= 0f)
+        // 이동 중 점프는 공중에서 Run_Jump 유지
+        if (!usePreJump && hasLeftGround && !isGrounded)
         {
-            playerStateMachine.ChangeState(new PlayerFallState(playerController, playerStateMachine, true));
             return;
         }
 
-        // 짧은 점프처럼 FallState를 거치기 전에 다시 접지한 경우 바로 지상 상태로 복귀함
+        // 제자리 점프는 정점에서 FallState로 전환
+        if (hasLeftGround && !isGrounded && ySpeed <= 0f)
+        {
+            playerStateMachine.ChangeState(
+                new PlayerFallState(playerController, playerStateMachine, true));
+            return;
+        }
+
+        // 실제 착지 시 지상 상태로 복귀
         if (hasLeftGround && isGrounded)
         {
             if (playerController.InputHandler.Movement.sqrMagnitude > 0.01f)
             {
-                playerStateMachine.ChangeState(new PlayerMoveState(playerController, playerStateMachine));
+                playerStateMachine.ChangeState(
+                    new PlayerMoveState(playerController, playerStateMachine));
             }
             else
             {
-                playerStateMachine.ChangeState(new PlayerIdleState(playerController, playerStateMachine));
+                playerStateMachine.ChangeState(
+                    new PlayerIdleState(playerController, playerStateMachine));
             }
 
             return;
         }
     }
 
-    // 점프 시작 높이 기록, 수직 속도 적용, Jump 모션 시작
+    // 수직 속도 적용 및 점프 모션 선택
     private void StartJump()
     {
         jumpStarted = true;
 
-        playerController.SetJumpStartY(playerController.transform.position.y);
+        playerController.SetJumpStartY(
+            playerController.transform.position.y);
+
         playerController.JumpController.TryJump(true);
-        playerController.PlayerAnimationController.SetMotion(PlayerMotion.Jump);
+
+        playerController.PlayerAnimationController.SetMotion(
+            usePreJump ? PlayerMotion.Jump : PlayerMotion.Run_Jump
+        );
     }
 
     public override void Exit()

@@ -8,5 +8,6 @@ public enum PlayerMotion
     InAir = 3,      // 공중 (낙하)
     PreLand = 4,    // 착지 준비 (보류)
     Land = 5,       // 착지 
+    Run_Jump = 6,
     // 6 이상은 파쿠르 동작
 }

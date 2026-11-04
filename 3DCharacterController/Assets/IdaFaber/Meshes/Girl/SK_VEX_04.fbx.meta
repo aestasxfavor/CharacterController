@@ -864,7 +864,7 @@ ModelImporter:
     - name: lowerarm_l
       parentName: upperarm_l
       position: {x: -0.24381919, y: 0.00000030857043, z: 0.0000026596983}
-      rotation: {x: -0.11530692, y: 0.018473318, z: 0.0359768, w: 0.99250627}
+      rotation: {x: -0.11530693, y: 0.018473318, z: 0.035976805, w: 0.99250627}
       scale: {x: 1, y: 1, z: 1}
     - name: hand_l
       parentName: lowerarm_l
@@ -1174,7 +1174,7 @@ ModelImporter:
     - name: cng_jaw
       parentName: head
       position: {x: 0.0075151077, y: -0.023681892, z: 0.0002042743}
-      rotation: {x: 0.46293297, y: -0.53429264, z: 0.46128783, w: 0.53613245}
+      rotation: {x: 0.46293342, y: -0.5342939, z: 0.46128714, w: 0.5361314}
       scale: {x: 1, y: 1, z: 1}
     - name: hair_back_01_l
       parentName: head
