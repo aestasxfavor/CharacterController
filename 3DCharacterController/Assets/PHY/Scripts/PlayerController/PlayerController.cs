@@ -91,6 +91,8 @@ public class PlayerController : MonoBehaviour
 
         groundDetector.CheckGround();
 
+      
+
         // JumpController의 수직 속도 보정은 착지 반응이 즉시 필요하므로
         // Raycast 기반 GroundDetector가 아닌 CharacterController의 접지 판정을 사용한다.
         jumpController.UpdateVertical(characterController.isGrounded, Time.deltaTime);
@@ -128,10 +130,17 @@ public class PlayerController : MonoBehaviour
 
         UnsupportedTime = IsSupportedByGround() ? 0f : UnsupportedTime + Time.deltaTime;
 
+        if (hasMoveInput)
+        {
+            Debug.Log($"IsGrounded: {groundDetector.IsGrounded}");
+        }
+
         if (hasMoveInput && groundDetector.IsGrounded)
         {
             movementController.Rotate(transform, moveDirection, Time.deltaTime);
         }
+
+        
     }
 
     /// <summary>

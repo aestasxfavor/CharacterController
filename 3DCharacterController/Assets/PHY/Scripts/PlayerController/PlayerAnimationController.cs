@@ -56,6 +56,8 @@ public class PlayerAnimationController : MonoBehaviour
         float normalizedSpeed = movementController.CurrentHorizontalSpeed / movementController.RunSpeed;
         normalizedSpeed = Mathf.Clamp01(normalizedSpeed);
 
+   
+
         SetSpeed(normalizedSpeed);
     }
 
