@@ -864,7 +864,7 @@ ModelImporter:
     - name: lowerarm_l
       parentName: upperarm_l
       position: {x: -0.24381919, y: 0.00000030857043, z: 0.0000026596983}
-      rotation: {x: -0.11530693, y: 0.018473318, z: 0.035976805, w: 0.99250627}
+      rotation: {x: -0.11530695, y: 0.018473318, z: 0.035976816, w: 0.99250627}
       scale: {x: 1, y: 1, z: 1}
     - name: hand_l
       parentName: lowerarm_l
@@ -1124,7 +1124,7 @@ ModelImporter:
     - name: neck_01
       parentName: spine_05
       position: {x: -0.12057211, y: -0.0062074005, z: 9.50465e-10}
-      rotation: {x: 0.0000026171722, y: 0.0000010519611, z: 0.21758398, w: 0.9760416}
+      rotation: {x: 0.000002518139, y: 0.0000011923411, z: 0.17480409, w: 0.9846032}
       scale: {x: 1, y: 1, z: 1}
     - name: neck_02
       parentName: neck_01

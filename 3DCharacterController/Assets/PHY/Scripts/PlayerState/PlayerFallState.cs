@@ -74,7 +74,7 @@ public class PlayerFallState : PlayerBaseState
             playerController.PlayerAnimationController.SetMotion(PlayerMotion.InAir);
         }
 
-        // InAir 중 착지가 가까워지면 PreLand(착지 준비) 모션 시작
+        // InAir 중 착지가 가까워지면 Land(착지 준비) 모션 시작
         if (inAirActive && !preLandShown && ShouldShowPreLand())
         {
             preLandShown = true;

@@ -30,6 +30,10 @@ public class CameraController : MonoBehaviour
     private float yaw;
     private float pitch;
 
+    [Header("커서")]
+    public bool lockCursor = true;
+    public KeyCode unlockKey = KeyCode.Escape;
+
     private void Reset()
     {
         FindReferences();
@@ -53,10 +57,25 @@ public class CameraController : MonoBehaviour
             // 메인 카메라 Transform 전달함
             playerController.SetCameraTransform(Camera.main.transform);
         }
+
+        //if(lockCursor)
+        //{
+        //    SetCursor(true);
+        //}
     }
 
     private void LateUpdate()
     {
+        // 커서
+        // NewInputSystem으로 변경예정
+        //if (lockCursor)
+        //{
+        //    if (Input.GetKeyDown(unlockKey)) SetCursor(false);
+        //    else if (Input.GetMouseButtonDown(0) && Cursor.lockState != CursorLockMode.Locked) SetCursor(true);
+        //}
+
+        //bool canControl = !lockCursor || Cursor.lockState == CursorLockMode.Locked;
+
         if (!useMouseLook) return;
         if (inputHandler == null || yawTarget == null) return;
 
@@ -183,5 +202,11 @@ public class CameraController : MonoBehaviour
         }
 
         return angle;
+    }
+
+    static void SetCursor(bool locked)
+    {
+        Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !locked;
     }
 }
