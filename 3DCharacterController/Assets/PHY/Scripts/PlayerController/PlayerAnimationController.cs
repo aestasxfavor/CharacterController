@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 public class PlayerAnimationController : MonoBehaviour
@@ -15,6 +16,7 @@ public class PlayerAnimationController : MonoBehaviour
     private readonly int IsLandingHash = Animator.StringToHash("IsLanding");
     private readonly int HasMoveInputHash = Animator.StringToHash("HasMoveInput");
     private readonly int MotionStateHash = Animator.StringToHash("MotionState");
+    private readonly string IdleJumpTrigger = "IdleJumpTrigger";
 
     private void Reset()
     {
@@ -32,7 +34,6 @@ public class PlayerAnimationController : MonoBehaviour
         if (jumpController == null) jumpController = GetComponent<JumpController>();
         if (movementController == null) movementController = GetComponent<MovementController>();
         if (animator == null) animator = GetComponent<Animator>();
-
     }
 
     private void Update()
@@ -53,10 +54,10 @@ public class PlayerAnimationController : MonoBehaviour
             return;
         }
 
-        float normalizedSpeed = movementController.CurrentHorizontalSpeed / movementController.RunSpeed;
-        normalizedSpeed = Mathf.Clamp01(normalizedSpeed);
+        float normalizedSpeed =
+            movementController.CurrentHorizontalSpeed / movementController.RunSpeed;
 
-   
+        normalizedSpeed = Mathf.Clamp01(normalizedSpeed);
 
         SetSpeed(normalizedSpeed);
     }
@@ -74,6 +75,28 @@ public class PlayerAnimationController : MonoBehaviour
         CurrentMotion = motion;
         if (animator == null) return;
         animator.SetInteger(MotionStateHash, (int)motion);
+    }
+
+    // 지정한 Animator State의 애니메이션 재생 완료 여부 확인
+    // State 전환 중이거나 해당 State가 아니면 false 반환
+    // 반복 재생하지 않는 단일 점프 클립에서 사용
+    public bool IsMotionComplete(string stateName)
+    {
+        if (animator == null)
+        {
+            return false;
+        }
+
+        if (animator.IsInTransition(0))
+        {
+            return false;
+        }
+
+        AnimatorStateInfo stateInfo =
+            animator.GetCurrentAnimatorStateInfo(0);
+
+        return stateInfo.IsName(stateName) &&
+               stateInfo.normalizedTime >= 1f;
     }
 
     public void SetYSpeed(float value)
@@ -104,6 +127,12 @@ public class PlayerAnimationController : MonoBehaviour
     {
         if (animator == null) return;
         animator.SetBool(HasMoveInputHash, value);
+    }
+
+    public void TriggerIdleJump()
+    {
+        if (animator == null) return;
+        animator.SetTrigger(IdleJumpTrigger);
     }
 
     private bool IsAnimationReady()

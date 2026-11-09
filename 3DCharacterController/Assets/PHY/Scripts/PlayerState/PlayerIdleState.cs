@@ -47,6 +47,9 @@ public class PlayerIdleState : PlayerBaseState
             bool hasMoveInput =
                 playerController.InputHandler.Movement.sqrMagnitude > 0.01f;
 
+            // 이동 입력이 없으면 제자리 점프
+            // 이동 입력이 있으면 이동 점프
+            // Trigger 실행은 PlayerJumpState.Enter()에서 담당
             playerStateMachine.ChangeState(
                 new PlayerJumpState(
                     playerController,
