@@ -1,10 +1,15 @@
+
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Components")]
-    [SerializeField] private CharacterController characterController;
-    [SerializeField] private PlayerAnimationController playerAnimationController;
+    [SerializeField]
+    private CharacterController characterController;
+
+    [SerializeField]
+    private PlayerAnimationController playerAnimationController;
+
     private Transform cameraTransform;
 
     [Header("Controllers")]
@@ -18,26 +23,39 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private PlayerStateMachine playerStateMachine;
 
     [Header("Air State")]
-    // 지면에 지지되지 않은 상태가 이 시간(초) 이상 이어지면 낙하로 판단
-    // 모서리나 작은 턱에서 접지가 한두 프레임 끊기는 경우를 걸러내는 유예 시간
+    // FSM 낙하 진입을 위한 유예 시간
+    // 수평 속도 보존 시점과는 별도로 관리
     [SerializeField] private float fallEnterDelay = 0.08f;
+
+    [Header("Rolling")]
+    // 구르기 상태 유지 시간
+    [SerializeField, Min(0.05f)]
+    private float rollingDuration = 0.8f;
+
+    public float RollingDuration => rollingDuration;
 
     [Header("Debug")]
     [SerializeField] private bool showDebugLog = true;
 
-    public CharacterController CharacterController => characterController;
-    public PlayerAnimationController PlayerAnimationController => playerAnimationController;
+    public CharacterController CharacterController =>
+        characterController;
+
+    public PlayerAnimationController PlayerAnimationController =>
+        playerAnimationController;
+
     public InputHandler InputHandler => inputHandler;
     public MovementController MovementController => movementController;
     public JumpController JumpController => jumpController;
     public GroundDetector GroundDetector => groundDetector;
     public HighFallDetector HighFallDetector => highFallDetector;
 
-    // 마지막으로 지면에 지지된 이후 경과 시간 (지지 중이면 0)
+    // 마지막으로 지면에 지지된 이후 경과 시간
     public float UnsupportedTime { get; private set; }
 
-    // 점프 중이 아니고 일정 시간 이상 지지받지 못하면 낙하로 판단 (Idle / Move 공용)
-    public bool ShouldStartFalling => !jumpController.IsJumping && UnsupportedTime >= fallEnterDelay;
+    // 기존 FSM 낙하 진입 판정 유지
+    public bool ShouldStartFalling =>
+        !jumpController.IsJumping &&
+        UnsupportedTime >= fallEnterDelay;
 
     public float JumpStartY => jumpStartY;
     private float jumpStartY;
@@ -45,7 +63,11 @@ public class PlayerController : MonoBehaviour
     public bool WasGrounded => wasGrounded;
     private bool wasGrounded;
 
-    public bool ControllerGroundedAfterMove { get; private set; }
+    public bool ControllerGroundedAfterMove
+    {
+        get;
+        private set;
+    }
 
     private void Reset()
     {
@@ -64,88 +86,177 @@ public class PlayerController : MonoBehaviour
 
         if (playerStateMachine != null)
         {
-            playerStateMachine.ChangeState(new PlayerIdleState(this, playerStateMachine));
+            playerStateMachine.ChangeState(
+                new PlayerIdleState(
+                    this,
+                    playerStateMachine));
         }
     }
 
-    public void SetCameraTransform(Transform newCameraTransform)
+    public void SetCameraTransform(
+        Transform newCameraTransform)
     {
         cameraTransform = newCameraTransform;
     }
 
     private void Update()
     {
-        if (!IsReady()) return;
+        if (!IsReady())
+            return;
 
         ControllerGroundedAfterMove = false;
 
         wasGrounded = groundDetector.IsGrounded;
 
+        // 현재 프레임의 이동 전에 지면 상태 검사
         groundDetector.CheckGround();
 
-        // JumpController의 수직 속도 보정은 착지 반응이 즉시 필요하므로
-        // Raycast 기반 GroundDetector가 아닌 CharacterController의 접지 판정을 사용한다.
-        jumpController.UpdateVertical(characterController.isGrounded, Time.deltaTime);
+        // 기존 수직 이동 처리 유지
+        jumpController.UpdateVertical(
+            characterController.isGrounded,
+            Time.deltaTime);
 
+        // 수평 이동 계산 전에 입력 잠금 갱신
+        UpdateFallMovementLock();
+
+        // 실제 수평 및 수직 이동
         ProcessMovement();
 
+        // 기존 FSM 업데이트 순서 유지
         playerStateMachine.UpdateState();
+    }
+
+    /// <summary>
+    /// 점프 하강과 플랫폼 이탈 시 수평 이동 입력 제어
+    /// 플랫폼 이탈 시 관성 보존은 FSM 낙하 진입보다 먼저 적용
+    /// </summary>
+    private void UpdateFallMovementLock()
+    {
+        // Rolling 중에는 접지 후에도 LOCK 유지
+        if (playerStateMachine != null &&
+            playerStateMachine.CurrentState is PlayerRollingState)
+        {
+            movementController.SetFallMovementLocked(true);
+            return;
+        }
+
+        // 실제 점프가 아닌 상태에서 지면을 지지하고 있다면 잠금 해제
+        if (groundDetector.IsGrounded &&
+            characterController.isGrounded &&
+            !jumpController.IsJumping)
+        {
+            movementController.SetFallMovementLocked(false);
+            return;
+        }
+
+        // 수직 속도가 음수일 때만 하강으로 판단
+        bool isDescending =
+            jumpController.VerticalVelocity < 0f;
+
+        // 기존 점프는 상승 중 입력 제어 유지
+        // 하강 중에만 LOCK + KEEP 적용
+        bool descendingFromJump =
+            jumpController.IsJumping &&
+            !characterController.isGrounded;
+
+        // 플랫폼 이탈은 지면 감지기가 지지 상실을 확인하는 순간부터
+        // 수평 속도를 보존
+        // FSM의 fallEnterDelay는 그대로 유지
+        bool descendingFromLedge =
+            !jumpController.IsJumping &&
+            !groundDetector.IsGrounded;
+
+        bool shouldLock =
+            isDescending &&
+            (descendingFromJump || descendingFromLedge);
+
+        movementController.SetFallMovementLocked(shouldLock);
     }
 
     private void ProcessMovement()
     {
-        Vector3 moveDirection = movementController.GetMoveDirection(inputHandler.Movement, cameraTransform);
+        Vector3 moveDirection =
+            movementController.GetMoveDirection(
+                inputHandler.Movement,
+                cameraTransform);
 
-        bool hasMoveInput = moveDirection.sqrMagnitude > 0.01f;
-        bool isRunPressed = inputHandler.IsRunPressed;
+        bool hasMoveInput =
+            moveDirection.sqrMagnitude > 0.01f;
 
-        playerAnimationController.SetMoveInput(hasMoveInput);
+        bool isRunPressed =
+            inputHandler.IsRunPressed;
 
-        Vector3 horizontalMove = movementController.GetHorizontalMove(moveDirection, Time.deltaTime,
-            groundDetector.IsGrounded, isRunPressed);
+        playerAnimationController.SetMoveInput(
+            hasMoveInput);
+
+        Vector3 horizontalMove =
+            movementController.GetHorizontalMove(
+                moveDirection,
+                Time.deltaTime,
+                groundDetector.IsGrounded,
+                isRunPressed);
 
         Vector3 finalMove = horizontalMove;
-        finalMove.y = jumpController.VerticalVelocity;
 
-        // CollisionFlags: Move 후 캐릭터 컨트롤러가 어떤 방향으로 충돌이 있었는지 알려주는 플래그
-        CollisionFlags flags = characterController.Move(finalMove * Time.deltaTime);
+        finalMove.y =
+            jumpController.VerticalVelocity;
 
-        bool hitBelow = (flags & CollisionFlags.Below) != 0;
+        // CharacterController 이동 및 충돌 판정
+        CollisionFlags flags =
+            characterController.Move(
+                finalMove * Time.deltaTime);
 
+        bool hitBelow =
+            (flags & CollisionFlags.Below) != 0;
+
+        // 이동 후 지면 상태 갱신
         groundDetector.CheckGround();
 
-        // CharacterController.Move 이후 실제 아래 방향 충돌이 있었는지 확인해
-        // FallState의 착지 전이 기준으로 사용한다.
-        ControllerGroundedAfterMove = hitBelow && groundDetector.IsGrounded;
+        ControllerGroundedAfterMove =
+            hitBelow &&
+            groundDetector.IsGrounded;
 
-        UnsupportedTime = IsSupportedByGround() ? 0f : UnsupportedTime + Time.deltaTime;
+        // FSM 낙하 상태 진입용 시간 갱신
+        UnsupportedTime =
+            IsSupportedByGround()
+                ? 0f
+                : UnsupportedTime + Time.deltaTime;
 
-        //if (hasMoveInput)
-        //{
-        //    Debug.Log($"IsGrounded: {groundDetector.IsGrounded}");
-        //}
+        bool isRolling =
+            playerStateMachine != null &&
+            playerStateMachine.CurrentState is PlayerRollingState;
 
-        if (hasMoveInput && groundDetector.IsGrounded)
+        // Rolling 중에는 캐릭터 회전 제한
+        // 기존 지상 이동 회전은 유지
+        if (!isRolling &&
+            hasMoveInput &&
+            groundDetector.IsGrounded)
         {
-            movementController.Rotate(transform, moveDirection, Time.deltaTime);
+            movementController.Rotate(
+                transform,
+                moveDirection,
+                Time.deltaTime);
         }
-
-        
     }
 
     /// <summary>
-    /// 현재 지면에 지지되고 있는지 판단
-    /// GroundDetector가 접지로 보면 지지 중이고,
-    /// 감지기가 지면을 못 찾았거나 걸을 수 있는 경사인데도 CharacterController가 접지라고 하면 지지 중으로 취급
-    /// (걸을 수 없는 급경사 위에서는 CharacterController 접지를 인정하지 않음)
+    /// 기존 지면 지지 판정
+    /// GroundDetector와 CharacterController 접지 상태 활용
     /// </summary>
     private bool IsSupportedByGround()
     {
-        if (groundDetector.IsGrounded) return true;
+        if (groundDetector.IsGrounded)
+        {
+            return true;
+        }
 
-        if (!characterController.isGrounded) return false;
+        if (!characterController.isGrounded)
+        {
+            return false;
+        }
 
-        return !groundDetector.HasGroundHit || groundDetector.IsWalkableSlope;
+        return !groundDetector.HasGroundHit ||
+               groundDetector.IsWalkableSlope;
     }
 
     public void SetJumpStartY(float value)
@@ -167,13 +278,52 @@ public class PlayerController : MonoBehaviour
 
     private void FindRefernces()
     {
-        if (characterController == null) characterController = GetComponent<CharacterController>();
-        if (inputHandler == null) inputHandler = GetComponent<InputHandler>();
-        if (movementController == null) movementController = GetComponent<MovementController>();
-        if (jumpController == null) jumpController = GetComponent<JumpController>();
-        if (groundDetector == null) groundDetector = GetComponent<GroundDetector>();
-        if (highFallDetector == null) highFallDetector = GetComponent<HighFallDetector>();
-        if (playerAnimationController == null) playerAnimationController = GetComponent<PlayerAnimationController>();
-        if (playerStateMachine == null) playerStateMachine = GetComponent<PlayerStateMachine>();
+        if (characterController == null)
+        {
+            characterController =
+                GetComponent<CharacterController>();
+        }
+
+        if (inputHandler == null)
+        {
+            inputHandler =
+                GetComponent<InputHandler>();
+        }
+
+        if (movementController == null)
+        {
+            movementController =
+                GetComponent<MovementController>();
+        }
+
+        if (jumpController == null)
+        {
+            jumpController =
+                GetComponent<JumpController>();
+        }
+
+        if (groundDetector == null)
+        {
+            groundDetector =
+                GetComponent<GroundDetector>();
+        }
+
+        if (highFallDetector == null)
+        {
+            highFallDetector =
+                GetComponent<HighFallDetector>();
+        }
+
+        if (playerAnimationController == null)
+        {
+            playerAnimationController =
+                GetComponent<PlayerAnimationController>();
+        }
+
+        if (playerStateMachine == null)
+        {
+            playerStateMachine =
+                GetComponent<PlayerStateMachine>();
+        }
     }
 }

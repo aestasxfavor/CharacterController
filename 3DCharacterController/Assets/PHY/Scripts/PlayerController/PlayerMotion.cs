@@ -6,7 +6,11 @@ public enum PlayerMotion
     Jump = 1,       // 제자리 점프 (단일 Jump 클립)
     Run_Jump = 2,   // 이동 중 점프 (Run_Jump 블렌드)
     Fall = 3,       // 낙하 
-    FallingToRolling = 4, // 낙하 후 구르기 
+    FallingToRoll = 4, // 낙하 후 구르기
+    Vault = 5,
+    Mantle = 6,
+    Slide = 7,
+    Wall_Run = 8,
 
-    // 6 이상은 파쿠르 동작
+    // 4 이상은 파쿠르 동작
 }
