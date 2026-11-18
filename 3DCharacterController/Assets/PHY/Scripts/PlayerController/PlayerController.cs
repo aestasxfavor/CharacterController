@@ -104,6 +104,11 @@ public class PlayerController : MonoBehaviour
         if (!IsReady())
             return;
 
+        // 이전 프레임의 실제 Move 접지 결과 보관
+        bool previousMoveGrounded =
+            ControllerGroundedAfterMove;
+
+        // 현재 프레임의 Move 결과는 이후 새로 기록
         ControllerGroundedAfterMove = false;
 
         wasGrounded = groundDetector.IsGrounded;
@@ -111,13 +116,13 @@ public class PlayerController : MonoBehaviour
         // 현재 프레임의 이동 전에 지면 상태 검사
         groundDetector.CheckGround();
 
-        // 기존 수직 이동 처리 유지
+        // 이전 Move 결과를 기준으로 수직 이동 처리
         jumpController.UpdateVertical(
-            characterController.isGrounded,
+            previousMoveGrounded,
             Time.deltaTime);
 
-        // 수평 이동 계산 전에 입력 잠금 갱신
-        UpdateFallMovementLock();
+        // 동일한 접지 기준으로 입력 잠금 갱신
+        UpdateFallMovementLock(previousMoveGrounded);
 
         // 실제 수평 및 수직 이동
         ProcessMovement();
@@ -130,7 +135,8 @@ public class PlayerController : MonoBehaviour
     /// 점프 하강과 플랫폼 이탈 시 수평 이동 입력 제어
     /// 플랫폼 이탈 시 관성 보존은 FSM 낙하 진입보다 먼저 적용
     /// </summary>
-    private void UpdateFallMovementLock()
+    private void UpdateFallMovementLock(
+        bool previousMoveGrounded)
     {
         // Rolling 중에는 접지 후에도 LOCK 유지
         if (playerStateMachine != null &&
@@ -140,9 +146,9 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // 실제 점프가 아닌 상태에서 지면을 지지하고 있다면 잠금 해제
+        // 실제 점프가 아닌 상태에서 지면을 지지하면 잠금 해제
         if (groundDetector.IsGrounded &&
-            characterController.isGrounded &&
+            previousMoveGrounded &&
             !jumpController.IsJumping)
         {
             movementController.SetFallMovementLocked(false);
@@ -157,11 +163,10 @@ public class PlayerController : MonoBehaviour
         // 하강 중에만 LOCK + KEEP 적용
         bool descendingFromJump =
             jumpController.IsJumping &&
-            !characterController.isGrounded;
+            !previousMoveGrounded;
 
-        // 플랫폼 이탈은 지면 감지기가 지지 상실을 확인하는 순간부터
-        // 수평 속도를 보존
-        // FSM의 fallEnterDelay는 그대로 유지
+        // 플랫폼 이탈은 지면 감지기가
+        // 지지 상실을 확인하는 순간부터 관성 보존
         bool descendingFromLedge =
             !jumpController.IsJumping &&
             !groundDetector.IsGrounded;
