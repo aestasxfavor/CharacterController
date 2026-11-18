@@ -211,8 +211,7 @@ public class PlayerController : MonoBehaviour
             characterController.Move(
                 finalMove * Time.deltaTime);
 
-        bool hitBelow =
-            (flags & CollisionFlags.Below) != 0;
+        bool hitBelow = (flags & CollisionFlags.Below) != 0;
 
         // 이동 후 지면 상태 갱신
         groundDetector.CheckGround();
