@@ -1921,6 +1921,7 @@ GameObject:
   - component: {fileID: 1780823937}
   - component: {fileID: 1780823936}
   - component: {fileID: 1780823935}
+  - component: {fileID: 1780823939}
   m_Layer: 9
   m_Name: VaultObstacle
   m_TagString: Untagged
@@ -2008,14 +2009,35 @@ Transform:
   m_GameObject: {fileID: 1780823934}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6, y: 0.455, z: -3}
-  m_LocalScale: {x: 3, y: 2, z: 3}
+  m_LocalPosition: {x: 6, y: 0.455, z: -4}
+  m_LocalScale: {x: 3, y: 0.91, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1813467732}
   - {fileID: 2052679520}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1780823939
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1780823934}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1813467731
 GameObject:
   m_ObjectHideFlags: 0
@@ -2430,13 +2452,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2052679519}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 1}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 1.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1780823938}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &2102152665
 GameObject:
   m_ObjectHideFlags: 0
@@ -9878,6 +9900,7 @@ MonoBehaviour:
   groundDetector: {fileID: 7837118995509664706}
   jumpController: {fileID: 4576468859381776992}
   movementController: {fileID: 5933867900207524577}
+  playerController: {fileID: 0}
 --- !u!4 &5724177858280336337
 Transform:
   m_ObjectHideFlags: 0

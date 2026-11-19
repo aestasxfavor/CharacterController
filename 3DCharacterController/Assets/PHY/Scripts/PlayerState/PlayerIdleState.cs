@@ -61,6 +61,20 @@ public class PlayerIdleState : PlayerBaseState
                         $"[Parkour] Idle -> " +
                         $"{parkourDetector.CurrentObstacle.Type} " +
                         $"실행 조건 통과");
+
+                    // 추가: Vault 타입만 VaultState로 전환
+                    if (parkourDetector.CurrentObstacle.Type ==
+                        ParkourType.Vault)
+                    {
+                        playerController.InputHandler.ResetJumpInput();
+
+                        playerStateMachine.ChangeState(
+                            new PlayerVaultState(
+                                playerController,
+                                playerStateMachine));
+
+                        return;
+                    }
                 }
                 else
                 {

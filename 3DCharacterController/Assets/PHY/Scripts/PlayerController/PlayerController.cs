@@ -69,6 +69,11 @@ public class PlayerController : MonoBehaviour
         private set;
     }
 
+    // 추가: Vault 실행 여부 확인
+    public bool IsVaultActive =>
+        playerStateMachine != null &&
+        playerStateMachine.CurrentState is PlayerVaultState;
+
     private void Reset()
     {
         FindRefernces();
@@ -104,6 +109,16 @@ public class PlayerController : MonoBehaviour
         if (!IsReady())
             return;
 
+        // 추가: Vault 중 일반 이동과 중력 처리 제외
+        if (IsVaultActive)
+        {
+            groundDetector.CheckGround();
+
+            // 애니메이션 완료 및 FSM 복귀 판정 유지
+            playerStateMachine.UpdateState();
+            return;
+        }
+
         // 이전 프레임의 실제 Move 접지 결과 보관
         bool previousMoveGrounded =
             ControllerGroundedAfterMove;
@@ -129,6 +144,32 @@ public class PlayerController : MonoBehaviour
 
         // 기존 FSM 업데이트 순서 유지
         playerStateMachine.UpdateState();
+    }
+
+    // 추가: Vault 애니메이션의 이동량을
+    // CharacterController에 적용
+    public void ApplyVaultRootMotion(Vector3 deltaPosition)
+    {
+        if (!IsVaultActive || characterController == null)
+            return;
+
+        CollisionFlags flags =
+            characterController.Move(deltaPosition);
+
+        bool hitBelow =
+            (flags & CollisionFlags.Below) != 0;
+
+        // Root Motion 이동 후 접지 정보 갱신
+        groundDetector.CheckGround();
+
+        ControllerGroundedAfterMove =
+            hitBelow &&
+            groundDetector.IsGrounded;
+
+        UnsupportedTime =
+            IsSupportedByGround()
+                ? 0f
+                : UnsupportedTime + Time.deltaTime;
     }
 
     /// <summary>
