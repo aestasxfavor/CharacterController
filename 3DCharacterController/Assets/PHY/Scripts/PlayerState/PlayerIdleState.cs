@@ -1,21 +1,12 @@
-
 using UnityEngine;
 
 public class PlayerIdleState : PlayerBaseState
 {
-    private readonly ParkourDetector parkourDetector;
-    private readonly ParkourConditionChecker parkourChecker;
-
     public PlayerIdleState(
         PlayerController _playerController,
         PlayerStateMachine _playerStateMachine)
         : base(_playerController, _playerStateMachine)
     {
-        parkourDetector =
-            playerController.GetComponent<ParkourDetector>();
-
-        parkourChecker =
-            playerController.GetComponent<ParkourConditionChecker>();
     }
 
     public override void Enter()
@@ -47,43 +38,11 @@ public class PlayerIdleState : PlayerBaseState
 
         if (canJump)
         {
-            if (parkourDetector != null &&
-                parkourDetector.HasObstacle &&
-                parkourChecker != null)
-            {
-                bool canParkour =
-                    parkourChecker.CanExecute(
-                        out string reason);
-
-                if (canParkour)
-                {
-                    Debug.Log(
-                        $"[Parkour] Idle -> " +
-                        $"{parkourDetector.CurrentObstacle.Type} " +
-                        $"실행 조건 통과");
-
-                    // 추가: Vault 타입만 VaultState로 전환
-                    if (parkourDetector.CurrentObstacle.Type ==
-                        ParkourType.Vault)
-                    {
-                        playerController.InputHandler.ResetJumpInput();
-
-                        playerStateMachine.ChangeState(
-                            new PlayerVaultState(
-                                playerController,
-                                playerStateMachine));
-
-                        return;
-                    }
-                }
-                else
-                {
-                    Debug.Log(
-                        $"[Parkour] Idle 실행 불가: {reason}");
-                }
-            }
-
             playerController.InputHandler.ResetJumpInput();
+
+            // 파쿠르 우선 시도, 실패하면 일반 점프
+            if (TryStartParkour())
+                return;
 
             bool hasMoveInput =
                 playerController.InputHandler.Movement.sqrMagnitude > 0.01f;
@@ -105,6 +64,17 @@ public class PlayerIdleState : PlayerBaseState
                     playerStateMachine));
             return;
         }
+    }
+
+    private bool TryStartParkour()
+    {
+        ParkourController parkour = playerController.ParkourController;
+
+        return parkour != null &&
+               parkour.TryStartParkour(
+                   playerController,
+                   playerStateMachine,
+                   "Idle");
     }
 
     public override void Exit()

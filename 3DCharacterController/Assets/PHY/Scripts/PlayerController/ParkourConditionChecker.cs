@@ -1,4 +1,3 @@
-
 using UnityEngine;
 
 public class ParkourConditionChecker : MonoBehaviour
@@ -11,8 +10,18 @@ public class ParkourConditionChecker : MonoBehaviour
     private PlayerController playerController;
 
     [Header("Execution Conditions")]
+    // StartPoint 앞(펜스 반대쪽)으로 이만큼 떨어져 있어도 허용
+    // 달리는 중 점프 키를 조금 일찍 눌러도 볼트가 나가게 해준다
     [SerializeField, Min(0.1f)]
-    private float maxStartDistance = 1.3f;
+    private float maxApproachDistance = 1.5f;
+
+    // StartPoint를 이만큼까지 지나쳤어도 허용 (뒤로 살짝 당겨서 정렬)
+    [SerializeField, Min(0f)]
+    private float maxPassedDistance = 0.5f;
+
+    // StartPoint 진행축 기준 좌우 허용 오차
+    [SerializeField, Min(0.05f)]
+    private float maxLateralOffset = 0.6f;
 
     [SerializeField, Range(0f, 180f)]
     private float maxFacingAngle = 50f;
@@ -24,7 +33,7 @@ public class ParkourConditionChecker : MonoBehaviour
         if (parkourDetector == null ||
             playerController == null)
         {
-            reason = "필수 컴포넌트 참조 없음";
+            reason = "필수 컴포넌트 누락";
             return false;
         }
 
@@ -40,7 +49,7 @@ public class ParkourConditionChecker : MonoBehaviour
         if (obstacle.Type != ParkourType.Vault &&
             obstacle.Type != ParkourType.Mantle)
         {
-            reason = "현재 구현 대상이 아닌 타입";
+            reason = "실행 가능한 타입이 아님";
             return false;
         }
 
@@ -52,30 +61,53 @@ public class ParkourConditionChecker : MonoBehaviour
             return false;
         }
 
-        // Player와 StartPoint 사이의 수평 거리
-        Vector3 toStart =
-            startPoint.position - transform.position;
+        // StartPoint 진행축(forward = 펜스를 향하는 방향) 기준으로 위치 분해
+        Vector3 startForward = startPoint.forward;
+        startForward.y = 0f;
 
-        toStart.y = 0f;
-
-        float distance = toStart.magnitude;
-
-        if (distance > maxStartDistance)
+        if (startForward.sqrMagnitude < 0.001f)
         {
-            reason =
-                $"거리 초과: {distance:F2}m";
+            reason = "StartPoint 방향 벡터 무효";
             return false;
         }
 
-        // 캐릭터와 파쿠르 진행 방향 비교
+        startForward.Normalize();
+
+        Vector3 startRight =
+            Vector3.Cross(Vector3.up, startForward);
+
+        Vector3 fromStart =
+            transform.position - startPoint.position;
+
+        fromStart.y = 0f;
+
+        // 음수: 아직 StartPoint에 도달 전, 양수: 이미 지나침
+        float along = Vector3.Dot(fromStart, startForward);
+        float lateral = Mathf.Abs(Vector3.Dot(fromStart, startRight));
+
+        if (along < -maxApproachDistance)
+        {
+            reason = $"너무 멀리 있음: {-along:F2}m 전";
+            return false;
+        }
+
+        if (along > maxPassedDistance)
+        {
+            reason = $"StartPoint를 너무 지나침: {along:F2}m";
+            return false;
+        }
+
+        if (lateral > maxLateralOffset)
+        {
+            reason = $"좌우 오차 초과: {lateral:F2}m";
+            return false;
+        }
+
+        // 캐릭터와 StartPoint의 방향 차이
         Vector3 playerForward = transform.forward;
-        Vector3 startForward = startPoint.forward;
-
         playerForward.y = 0f;
-        startForward.y = 0f;
 
-        if (playerForward.sqrMagnitude < 0.001f ||
-            startForward.sqrMagnitude < 0.001f)
+        if (playerForward.sqrMagnitude < 0.001f)
         {
             reason = "방향 벡터가 유효하지 않음";
             return false;
@@ -87,16 +119,14 @@ public class ParkourConditionChecker : MonoBehaviour
 
         if (angle > maxFacingAngle)
         {
-            reason =
-                $"방향 불일치: {angle:F1}도";
+            reason = $"방향 불일치: {angle:F1}도";
             return false;
         }
 
-        // 기존 GroundDetector의 접지 판정 재사용
         if (!playerController.GroundDetector.IsGrounded ||
             !playerController.GroundDetector.IsWalkableSlope)
         {
-            reason = "접지 또는 경사 조건 미충족";
+            reason = "지면 또는 경사 조건 불만족";
             return false;
         }
 

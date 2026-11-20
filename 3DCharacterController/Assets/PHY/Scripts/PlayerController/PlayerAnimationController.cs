@@ -76,19 +76,21 @@ public class PlayerAnimationController : MonoBehaviour
         {
             // 기존 Animator의 Root Motion 설정 유지
             if (animator.applyRootMotion)
+            {
                 animator.ApplyBuiltinRootMotion();
+
+            }
 
             return;
         }
 
         // 추가: Root Motion 진단 로그
-        Debug.Log(
-            $"[Vault RootMotion] " +
-            $"deltaPosition: {animator.deltaPosition.ToString("F4")}"
-        );
+        //Debug.Log(
+        //    $"[Vault RootMotion] " +
+        //    $"deltaPosition: {animator.deltaPosition.ToString("F4")}"
+        //);
 
-        playerController.ApplyVaultRootMotion(
-            animator.deltaPosition);
+        playerController.ApplyVaultRootMotion(animator.deltaPosition);
     }
 
     private void UpdateMoveSpeed()

@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private JumpController jumpController;
     [SerializeField] private GroundDetector groundDetector;
     [SerializeField] private HighFallDetector highFallDetector;
+    [SerializeField] private ParkourController parkourController;
 
     [Header("StatePatterns")]
     [SerializeField] private PlayerStateMachine playerStateMachine;
@@ -37,11 +38,9 @@ public class PlayerController : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool showDebugLog = true;
 
-    public CharacterController CharacterController =>
-        characterController;
+    public CharacterController CharacterController => characterController;
 
-    public PlayerAnimationController PlayerAnimationController =>
-        playerAnimationController;
+    public PlayerAnimationController PlayerAnimationController => playerAnimationController;
 
     public InputHandler InputHandler => inputHandler;
     public MovementController MovementController => movementController;
@@ -49,6 +48,7 @@ public class PlayerController : MonoBehaviour
     public GroundDetector GroundDetector => groundDetector;
     public HighFallDetector HighFallDetector => highFallDetector;
 
+    public ParkourController ParkourController => parkourController;
     // 마지막으로 지면에 지지된 이후 경과 시간
     public float UnsupportedTime { get; private set; }
 
@@ -150,6 +150,11 @@ public class PlayerController : MonoBehaviour
     // CharacterController에 적용
     public void ApplyVaultRootMotion(Vector3 deltaPosition)
     {
+
+        // 디버그 확인용
+        //Animator a = GetComponentInChildren<Animator>();
+        //Debug.Log($"[VaultRM] t={Time.time:F3} delta={deltaPosition.magnitude:F3} inTrans={a.IsInTransition(0)} vaultState={a.GetCurrentAnimatorStateInfo(0).IsName("Vault")}");
+        
         if (!IsVaultActive || characterController == null)
             return;
 
@@ -325,50 +330,48 @@ public class PlayerController : MonoBehaviour
     {
         if (characterController == null)
         {
-            characterController =
-                GetComponent<CharacterController>();
+            characterController = GetComponent<CharacterController>();
         }
 
         if (inputHandler == null)
         {
-            inputHandler =
-                GetComponent<InputHandler>();
+            inputHandler = GetComponent<InputHandler>();
         }
 
         if (movementController == null)
         {
-            movementController =
-                GetComponent<MovementController>();
+            movementController = GetComponent<MovementController>();
         }
 
         if (jumpController == null)
         {
-            jumpController =
-                GetComponent<JumpController>();
+            jumpController = GetComponent<JumpController>();
         }
 
         if (groundDetector == null)
         {
-            groundDetector =
-                GetComponent<GroundDetector>();
+            groundDetector = GetComponent<GroundDetector>();
         }
 
         if (highFallDetector == null)
         {
-            highFallDetector =
-                GetComponent<HighFallDetector>();
+            highFallDetector = GetComponent<HighFallDetector>();
         }
 
         if (playerAnimationController == null)
         {
-            playerAnimationController =
-                GetComponent<PlayerAnimationController>();
+            playerAnimationController = GetComponent<PlayerAnimationController>();
         }
 
         if (playerStateMachine == null)
         {
-            playerStateMachine =
-                GetComponent<PlayerStateMachine>();
+            playerStateMachine = GetComponent<PlayerStateMachine>();
+        }
+
+        if (parkourController == null)
+        {
+            parkourController = GetComponent<ParkourController>();
+
         }
     }
 }
