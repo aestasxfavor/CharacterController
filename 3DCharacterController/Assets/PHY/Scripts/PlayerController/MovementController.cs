@@ -272,13 +272,9 @@ public class MovementController : MonoBehaviour
         Vector3 moveDirection,
         float deltaTime)
     {
-        Vector3 flatDirection = new Vector3(
-            moveDirection.x,
-            0f,
-            moveDirection.z);
+        Vector3 flatDirection = new Vector3( moveDirection.x, 0f, moveDirection.z);
 
-        if (flatDirection.sqrMagnitude < 0.01f)
-            return;
+        if (flatDirection.sqrMagnitude < 0.01f) return;
 
         float targetYaw = GetYaw(flatDirection);
 
@@ -287,16 +283,13 @@ public class MovementController : MonoBehaviour
             targetYaw,
             rotationSpeed * deltaTime);
 
-        target.rotation =
-            Quaternion.Euler(0f, newYaw, 0f);
+        target.rotation = Quaternion.Euler(0f, newYaw, 0f);
     }
 
     // 수평 방향을 Y축 회전각으로 변환
     private static float GetYaw(Vector3 direction)
     {
-        return Mathf.Atan2(
-            direction.x,
-            direction.z) * Mathf.Rad2Deg;
+        return Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
     }
 
     // Y축 회전각을 수평 방향 벡터로 변환
@@ -304,9 +297,13 @@ public class MovementController : MonoBehaviour
     {
         float rad = yaw * Mathf.Deg2Rad;
 
-        return new Vector3(
-            Mathf.Sin(rad),
-            0f,
-            Mathf.Cos(rad));
+        return new Vector3(Mathf.Sin(rad), 0f, Mathf.Cos(rad));
+    }
+
+    // 파쿠르 등 루트모션 동작이 끝날 때 속도를 이어받는다
+    public void SetHorizontalVelocity(Vector3 velocity)
+    {
+        velocity.y = 0f;
+        currentHorizontalVelocity = velocity;
     }
 }

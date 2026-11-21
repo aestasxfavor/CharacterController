@@ -8,9 +8,7 @@ public class PlayerAnimationController : MonoBehaviour
     [SerializeField] private GroundDetector groundDetector;
     [SerializeField] private JumpController jumpController;
     [SerializeField] private MovementController movementController;
-
-    // 추가: Root Motion 전달 대상
-    [SerializeField] private PlayerController playerController;
+    [SerializeField] private PlayerController playerController;     // 추가: Root Motion 전달 대상
 
     private readonly int SpeedHash = Animator.StringToHash("Speed");
     private readonly int YSpeedHash = Animator.StringToHash("YSpeed");
@@ -21,6 +19,12 @@ public class PlayerAnimationController : MonoBehaviour
     private readonly int MotionStateHash = Animator.StringToHash("MotionState");
     private readonly string IdleJumpTrigger = "IdleJumpTrigger";
 
+    // 착지 프레임 Animation Event가 열어주는 종료 구간 플래그
+    public bool ParkourExitWindowOpened { get; private set; }
+
+    // 마지막 프레임의 루트모션 속도 (파쿠르 종료 시 MovementController에 인계)
+    public Vector3 RootMotionVelocity { get; private set; }
+
     private void Reset()
     {
         characterController = GetComponent<CharacterController>();
@@ -28,8 +32,6 @@ public class PlayerAnimationController : MonoBehaviour
         jumpController = GetComponent<JumpController>();
         movementController = GetComponent<MovementController>();
         animator = GetComponent<Animator>();
-
-        // 추가
         playerController = GetComponentInParent<PlayerController>();
     }
 
@@ -68,27 +70,23 @@ public class PlayerAnimationController : MonoBehaviour
     // 추가: Vault 중 Root Motion 전달
     private void OnAnimatorMove()
     {
-        if (animator == null)
-            return;
+        if (animator == null) return;
 
-        if (playerController == null ||
-            !playerController.IsVaultActive)
+        // 추가: 이번 프레임 루트모션 속도 기록
+        RootMotionVelocity = Time.deltaTime > 0f
+            ? animator.deltaPosition / Time.deltaTime
+            : Vector3.zero;
+
+
+        if (playerController == null || !playerController.IsVaultActive)
         {
             // 기존 Animator의 Root Motion 설정 유지
             if (animator.applyRootMotion)
             {
                 animator.ApplyBuiltinRootMotion();
-
             }
-
             return;
         }
-
-        // 추가: Root Motion 진단 로그
-        //Debug.Log(
-        //    $"[Vault RootMotion] " +
-        //    $"deltaPosition: {animator.deltaPosition.ToString("F4")}"
-        //);
 
         playerController.ApplyVaultRootMotion(animator.deltaPosition);
     }
@@ -205,5 +203,18 @@ public class PlayerAnimationController : MonoBehaviour
             && groundDetector != null
             && jumpController != null
             && movementController != null;
+    }
+
+    // Animation Event 수신용. 클립 Events에 이 이름으로 등록한다.
+    // Mantle, Slide 등에서도 같은 이름을 재사용한다.
+    public void OnParkourExitWindow()
+    {
+        ParkourExitWindowOpened = true;
+        Debug.Log("[Anim] ParkourExitWindow");
+    }
+
+    public void ResetParkourExitWindow()
+    {
+        ParkourExitWindowOpened = false;
     }
 }

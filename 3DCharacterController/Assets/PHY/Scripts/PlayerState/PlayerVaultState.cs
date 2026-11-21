@@ -2,9 +2,18 @@ using UnityEngine;
 
 /// <summary>
 /// Vault 상태.
+///
 /// 1단계 Aligning : 달리기 모션을 유지한 채 StartPoint 위치/방향으로 부드럽게 이동
 /// 2단계 Playing  : Vault 모션 시작 + Root Motion으로 이동
-/// 상태 진입 시 장애물 몸통 콜라이더와 충돌을 무시하고, 나갈 때 복구한다.
+///
+/// 종료 규칙
+///  - 착지 이벤트(OnParkourExitWindow) 전   : 입력과 관계없이 유지
+///  - 착지 이벤트 ~ 클립 끝                 : 이동 입력이 들어오는 즉시 Move로 전환
+///  - 클립 끝                               : 입력이 없으면 Idle, 있으면 Move
+///  - 지면 위가 아니면                      : Fall
+///
+/// Move로 넘어갈 때는 클립 루트모션 속도의 크기와 캐릭터 정면 방향으로
+/// MovementController 속도를 맞춘 뒤, 이후는 기존 가속 로직에 맡긴다.
 /// </summary>
 public class PlayerVaultState : PlayerBaseState
 {
@@ -50,6 +59,7 @@ public class PlayerVaultState : PlayerBaseState
 
         playerController.PlayerAnimationController.SetAirborne(false);
         playerController.PlayerAnimationController.SetLanding(false);
+        playerController.PlayerAnimationController.ResetParkourExitWindow();
 
         if (obstacle != null)
             SetObstacleCollision(true);
@@ -61,6 +71,8 @@ public class PlayerVaultState : PlayerBaseState
 
         Debug.Log("[Vault] Enter");
     }
+
+    // ───────────── 정렬 ─────────────
 
     /// <summary>
     /// 정렬 목표 계산. 정렬이 필요 없으면 false.
@@ -82,11 +94,22 @@ public class PlayerVaultState : PlayerBaseState
         alignStartPos = player.position;
         alignStartRot = player.rotation;
 
+        // 좌우 위치는 플레이어의 현재 위치를 유지하고,
+        // StartPoint 기준선(앞뒤 거리)과 방향에만 맞춘다.
         // Y는 현재 높이 유지 (바닥 높이는 CharacterController가 처리)
+        Vector3 right = Vector3.Cross(Vector3.up, forward.normalized);
+
+        Vector3 toPlayer = player.position - sp.position;
+        toPlayer.y = 0f;
+
+        float lateral = Vector3.Dot(toPlayer, right);
+
+        Vector3 basePos = sp.position + right * lateral;
+
         alignTargetPos = new Vector3(
-            sp.position.x,
+            basePos.x,
             player.position.y,
-            sp.position.z);
+            basePos.z);
 
         alignTargetRot = Quaternion.LookRotation(forward.normalized);
 
@@ -132,14 +155,129 @@ public class PlayerVaultState : PlayerBaseState
             BeginMotion();
     }
 
+    // ───────────── 모션 ─────────────
+
     private void BeginMotion()
     {
         phase = Phase.Playing;
+
+        // 이전 파쿠르에서 남은 이벤트 플래그 초기화
+        playerController.PlayerAnimationController.ResetParkourExitWindow();
 
         playerController.PlayerAnimationController.SetMotion(
             PlayerMotion.Vault);
 
         Debug.Log("[Vault] Motion Start");
+    }
+
+    public override void Update()
+    {
+        if (isFinishing)
+            return;
+
+        if (phase == Phase.Aligning)
+        {
+            UpdateAlignment();
+            return;
+        }
+
+        PlayerAnimationController anim =
+            playerController.PlayerAnimationController;
+
+        bool windowOpened = anim.ParkourExitWindowOpened;
+        bool clipComplete = anim.IsMotionComplete(VaultStateName);
+
+        // 착지 이벤트 전이면 입력과 관계없이 유지
+        // (이벤트를 안 넣은 클립은 클립 끝에서 종료되어 안전장치가 된다)
+        if (!windowOpened && !clipComplete)
+            return;
+
+        bool hasMoveInput =
+            playerController.InputHandler.Movement.sqrMagnitude > 0.01f;
+
+        // 종료 구간 안에서는 입력이 들어오면 즉시 전환,
+        // 입력이 없으면 클립 끝까지 재생
+        if (!clipComplete && !hasMoveInput)
+            return;
+
+        FinishVault(hasMoveInput);
+    }
+
+    // ───────────── 종료 ─────────────
+
+    private void FinishVault(bool hasMoveInput)
+    {
+        if (isFinishing)
+            return;
+
+        isFinishing = true;
+
+        playerController.GroundDetector.CheckGround();
+
+        bool isGrounded =
+            playerController.GroundDetector.IsGrounded &&
+            playerController.GroundDetector.IsWalkableSlope;
+
+        if (!isGrounded)
+        {
+            Debug.Log("[Vault] Exit -> Fall");
+
+            playerStateMachine.ChangeState(
+                new PlayerFallState(
+                    playerController,
+                    playerStateMachine,
+                    false));
+
+            return;
+        }
+
+        if (hasMoveInput)
+        {
+            // 클립 속도의 크기 + 캐릭터 정면 방향으로 속도를 맞춘다.
+            // 이후는 MovementController가 설정 속도까지 가속한다.
+            Vector3 rootVelocity =
+                playerController.PlayerAnimationController.RootMotionVelocity;
+
+            rootVelocity.y = 0f;
+
+            Vector3 forward = playerController.transform.forward;
+            forward.y = 0f;
+            forward.Normalize();
+
+            float speed = rootVelocity.magnitude;
+
+            playerController.MovementController
+                .SetHorizontalVelocity(forward * speed);
+
+            Debug.Log($"[Vault] Exit -> Move (속도 인계 {speed:F2} m/s)");
+
+            playerStateMachine.ChangeState(
+                new PlayerMoveState(
+                    playerController,
+                    playerStateMachine));
+        }
+        else
+        {
+            playerController.MovementController
+                .SetHorizontalVelocity(Vector3.zero);
+
+            Debug.Log("[Vault] Exit -> Idle");
+
+            playerStateMachine.ChangeState(
+                new PlayerIdleState(
+                    playerController,
+                    playerStateMachine));
+        }
+    }
+
+    public override void Exit()
+    {
+        // 어떤 경로로 빠져나가든 반드시 충돌 복구
+        SetObstacleCollision(false);
+
+        playerController.PlayerAnimationController.ResetParkourExitWindow();
+
+        Debug.Log("[Vault] Exit");
     }
 
     private void SetObstacleCollision(bool ignore)
@@ -159,78 +297,5 @@ public class PlayerVaultState : PlayerBaseState
         }
 
         collisionIgnored = ignore;
-    }
-
-    public override void Update()
-    {
-        if (isFinishing)
-            return;
-
-        if (phase == Phase.Aligning)
-        {
-            UpdateAlignment();
-            return;
-        }
-
-        bool isComplete =
-            playerController.PlayerAnimationController
-                .IsMotionComplete(VaultStateName);
-
-        if (!isComplete)
-            return;
-
-        FinishVault();
-    }
-
-    private void FinishVault()
-    {
-        if (isFinishing)
-            return;
-
-        isFinishing = true;
-
-        Debug.Log("[Vault] Animation Complete");
-
-        playerController.GroundDetector.CheckGround();
-
-        bool isGrounded =
-            playerController.GroundDetector.IsGrounded &&
-            playerController.GroundDetector.IsWalkableSlope;
-
-        if (!isGrounded)
-        {
-            playerStateMachine.ChangeState(
-                new PlayerFallState(
-                    playerController,
-                    playerStateMachine,
-                    false));
-            return;
-        }
-
-        bool hasMoveInput =
-            playerController.InputHandler.Movement.sqrMagnitude > 0.01f;
-
-        if (hasMoveInput)
-        {
-            playerStateMachine.ChangeState(
-                new PlayerMoveState(
-                    playerController,
-                    playerStateMachine));
-        }
-        else
-        {
-            playerStateMachine.ChangeState(
-                new PlayerIdleState(
-                    playerController,
-                    playerStateMachine));
-        }
-    }
-
-    public override void Exit()
-    {
-        // 어떤 경로로 빠져나가든 반드시 충돌 복구
-        SetObstacleCollision(false);
-
-        Debug.Log("[Vault] Exit");
     }
 }

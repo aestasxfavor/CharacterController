@@ -11,7 +11,6 @@ public class ParkourConditionChecker : MonoBehaviour
 
     [Header("Execution Conditions")]
     // StartPoint 앞(펜스 반대쪽)으로 이만큼 떨어져 있어도 허용
-    // 달리는 중 점프 키를 조금 일찍 눌러도 볼트가 나가게 해준다
     [SerializeField, Min(0.1f)]
     private float maxApproachDistance = 1.5f;
 
@@ -19,9 +18,14 @@ public class ParkourConditionChecker : MonoBehaviour
     [SerializeField, Min(0f)]
     private float maxPassedDistance = 0.5f;
 
-    // StartPoint 진행축 기준 좌우 허용 오차
-    [SerializeField, Min(0.05f)]
-    private float maxLateralOffset = 0.6f;
+    // 장애물 폭의 양 끝에서 이만큼 안쪽까지만 실행 허용
+    // (끝에 서 있을 때 몸이 장애물 밖으로 나가 허공에서 시작하는 것을 방지)
+    [SerializeField, Min(0f)]
+    private float edgeMargin = 0.3f;
+
+    // 폭을 계산하지 못했을 때(콜라이더 없음) 쓸 기본 반폭
+    [SerializeField, Min(0.1f)]
+    private float fallbackHalfWidth = 0.6f;
 
     [SerializeField, Range(0f, 180f)]
     private float maxFacingAngle = 50f;
@@ -61,7 +65,7 @@ public class ParkourConditionChecker : MonoBehaviour
             return false;
         }
 
-        // StartPoint 진행축(forward = 펜스를 향하는 방향) 기준으로 위치 분해
+        // StartPoint 진행축(forward = 장애물을 향하는 방향) 기준으로 위치 분해
         Vector3 startForward = startPoint.forward;
         startForward.y = 0f;
 
@@ -97,13 +101,21 @@ public class ParkourConditionChecker : MonoBehaviour
             return false;
         }
 
-        if (lateral > maxLateralOffset)
+        // 좌우: 장애물 폭 안(끝에서 edgeMargin 안쪽)이면 어디든 허용
+        float halfWidth = obstacle.GetHalfWidth(startRight);
+
+        if (halfWidth <= 0f)
+            halfWidth = fallbackHalfWidth;
+
+        float allowedLateral = Mathf.Max(0f, halfWidth - edgeMargin);
+
+        if (lateral > allowedLateral)
         {
-            reason = $"좌우 오차 초과: {lateral:F2}m";
+            reason =
+                $"장애물 폭 밖: {lateral:F2}m (허용 {allowedLateral:F2}m)";
             return false;
         }
 
-        // 캐릭터와 StartPoint의 방향 차이
         Vector3 playerForward = transform.forward;
         playerForward.y = 0f;
 
