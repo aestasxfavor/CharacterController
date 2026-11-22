@@ -15,7 +15,7 @@ using UnityEngine;
 /// Move로 넘어갈 때는 클립 루트모션 속도의 크기와 캐릭터 정면 방향으로
 /// MovementController 속도를 맞춘 뒤, 이후는 기존 가속 로직에 맡긴다.
 /// </summary>
-public class PlayerVaultState : PlayerBaseState
+public class PlayerVaultState : PlayerParkourState
 {
     private const string VaultStateName = "Vault";
 
@@ -42,7 +42,7 @@ public class PlayerVaultState : PlayerBaseState
     private float alignDuration;
 
     // PlayerController가 정렬 중 루트모션을 무시하기 위해 참조
-    public bool IsAligning => phase == Phase.Aligning;
+    public override bool IsAligning => phase == Phase.Aligning;
 
     public PlayerVaultState(
         PlayerController _playerController,

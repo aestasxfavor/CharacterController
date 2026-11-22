@@ -85,24 +85,15 @@ public class ParkourController : MonoBehaviour
     /// 파쿠르 타입별 상태 생성.
     /// 새 동작을 추가할 때는 여기에 case 하나만 추가하면 된다.
     /// </summary>
-    private PlayerBaseState CreateState(
-        ParkourObstacle obstacle,
-        PlayerController playerController,
-        PlayerStateMachine playerStateMachine)
+    private PlayerBaseState CreateState(ParkourObstacle obstacle, PlayerController playerController, PlayerStateMachine playerStateMachine)
     {
         switch (obstacle.Type)
         {
             case ParkourType.Vault:
-                return new PlayerVaultState(
-                    playerController,
-                    playerStateMachine,
-                    obstacle);
+                return new PlayerVaultState(playerController, playerStateMachine, obstacle);
 
-            // case ParkourType.Mantle:
-            //     return new PlayerMantleState(
-            //         playerController,
-            //         playerStateMachine,
-            //         obstacle);
+            case ParkourType.Mantle:
+                return new PlayerMantleState(playerController, playerStateMachine, obstacle);
 
             default:
                 return null;
@@ -112,6 +103,8 @@ public class ParkourController : MonoBehaviour
     private void Log(string message)
     {
         if (showDebugLog)
+        {
             Debug.Log(message);
+        }
     }
 }

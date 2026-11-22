@@ -70,9 +70,9 @@ public class PlayerController : MonoBehaviour
     }
 
     // 추가: Vault 실행 여부 확인
-    public bool IsVaultActive =>
+    public bool IsParkourActive =>
         playerStateMachine != null &&
-        playerStateMachine.CurrentState is PlayerVaultState;
+        playerStateMachine.CurrentState is PlayerParkourState;
 
     private void Reset()
     {
@@ -110,7 +110,7 @@ public class PlayerController : MonoBehaviour
             return;
 
         // 추가: Vault 중 일반 이동과 중력 처리 제외
-        if (IsVaultActive)
+        if (IsParkourActive)
         {
             groundDetector.CheckGround();
 
@@ -148,33 +148,30 @@ public class PlayerController : MonoBehaviour
 
     // 추가: Vault 애니메이션의 이동량을
     // CharacterController에 적용
-    public void ApplyVaultRootMotion(Vector3 deltaPosition)
-    {
+    public void ApplyParkourRootMotion(Vector3 deltaPosition)
+    {   
+        if (!IsParkourActive || characterController == null) return;
 
-        // 디버그 확인용
-        //Animator a = GetComponentInChildren<Animator>();
-        //Debug.Log($"[VaultRM] t={Time.time:F3} delta={deltaPosition.magnitude:F3} inTrans={a.IsInTransition(0)} vaultState={a.GetCurrentAnimatorStateInfo(0).IsName("Vault")}");
-        
-        if (!IsVaultActive || characterController == null)
-            return;
+        CollisionFlags flags = characterController.Move(deltaPosition);
 
-        CollisionFlags flags =
-            characterController.Move(deltaPosition);
-
-        bool hitBelow =
-            (flags & CollisionFlags.Below) != 0;
+        bool hitBelow = (flags & CollisionFlags.Below) != 0;
 
         // Root Motion 이동 후 접지 정보 갱신
         groundDetector.CheckGround();
 
-        ControllerGroundedAfterMove =
-            hitBelow &&
-            groundDetector.IsGrounded;
+        ControllerGroundedAfterMove = hitBelow && groundDetector.IsGrounded;
 
-        UnsupportedTime =
-            IsSupportedByGround()
-                ? 0f
-                : UnsupportedTime + Time.deltaTime;
+        UnsupportedTime = IsSupportedByGround() ? 0f : UnsupportedTime + Time.deltaTime;
+    }
+
+    /// <summary>
+    /// 파쿠르가 지면 위에서 끝났을 때 공중 상태 기록을 정리한다.
+    /// (Mantle처럼 오르는 동안 공중이던 동작용)
+    /// </summary>
+    public void ResetGroundedAfterParkour()
+    {
+        ControllerGroundedAfterMove = true;
+        UnsupportedTime = 0f;
     }
 
     /// <summary>

@@ -78,7 +78,7 @@ public class PlayerAnimationController : MonoBehaviour
             : Vector3.zero;
 
 
-        if (playerController == null || !playerController.IsVaultActive)
+        if (playerController == null || !playerController.IsParkourActive)
         {
             // 기존 Animator의 Root Motion 설정 유지
             if (animator.applyRootMotion)
@@ -88,7 +88,7 @@ public class PlayerAnimationController : MonoBehaviour
             return;
         }
 
-        playerController.ApplyVaultRootMotion(animator.deltaPosition);
+        playerController.ApplyParkourRootMotion(animator.deltaPosition);
     }
 
     private void UpdateMoveSpeed()
