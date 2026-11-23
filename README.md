@@ -9,7 +9,7 @@ Unity와 C#으로 제작한 3D 캐릭터 컨트롤러 개인 기술 데모입니
 
 | 2차 진행 현황 (2026.11) | 1차 완성 버전 (2026.05) |
 |---|---|
-| TODO: 새 영상 링크 | [YouTube](https://youtu.be/CF7NiWzTbsY) |
+| [YouTube](https://youtu.be/OLy0qZ_2U5U) | [YouTube](https://youtu.be/CF7NiWzTbsY) |
 
 ## 프로젝트 정보
 
