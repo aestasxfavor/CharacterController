@@ -25,8 +25,6 @@ public class PlayerMantleState : PlayerParkourState
     private const float MinAlignDuration = 0.05f;
     private const float MaxAlignDuration = 0.25f;
 
-    // 윗면 스냅: 캡슐 바닥이 윗면 + 이 값 높이가 되도록 보정
-    private const float SnapClearance = 0.02f;
     // 보정 거리가 이 값을 넘으면 스냅하지 않고 경고만 남긴다 (높이 불일치 감지용)
     private const float MaxSnapDistance = 0.15f;
 
@@ -72,7 +70,6 @@ public class PlayerMantleState : PlayerParkourState
         else
             BeginMotion();
 
-        Debug.Log("[Mantle] Enter");
     }
 
     // ---------- 정렬 ----------
@@ -159,19 +156,22 @@ public class PlayerMantleState : PlayerParkourState
     {
         phase = Phase.Playing;
 
+        PlayerAnimationController anim = playerController.PlayerAnimationController;
+
         // 정렬 구간에서 들어온 이벤트 플래그 초기화
-        playerController.PlayerAnimationController.ResetParkourExitWindow();
+        anim.ResetParkourExitWindow();
 
-        playerController.PlayerAnimationController.SetMotion(
-            PlayerMotion.Mantle);
+        anim.SetMotion(PlayerMotion.Mantle);
 
-        Debug.Log("[Mantle] Motion Start");
+        // 상태 전환 첫 프레임에 Animator가 내보내는 이동량은 클립의 실제 이동이 아니라
+        // 직전 자세(Locomotion 걸음 위상)와 Mantle 시작 자세의 차이다(-30~+70cm).
+        // 이 1회분을 버려야 종료 위치가 항상 같다.
+        anim.SkipNextRootMotion = true;
     }
 
     public override void Update()
     {
-        if (isFinishing)
-            return;
+        if (isFinishing) return;
 
         if (phase == Phase.Aligning)
         {
@@ -179,33 +179,41 @@ public class PlayerMantleState : PlayerParkourState
             return;
         }
 
+        if (!ShouldFinish(out bool hasMoveInput)) return;
+
+        FinishMantle(hasMoveInput);
+    }
+
+    /// <summary>
+    /// 종료 구간 판정.
+    ///  - 종료 이벤트 전 : 입력과 상관없이 유지
+    ///  - 종료 이벤트 ~ 클립 끝 : 이동 입력이 있을 때만 즉시 전환
+    ///  - 클립 끝 : 입력과 상관없이 전환
+    /// </summary>
+    private bool ShouldFinish(out bool hasMoveInput)
+    {
         PlayerAnimationController anim =
             playerController.PlayerAnimationController;
 
         bool windowOpened = anim.ParkourExitWindowOpened;
         bool clipComplete = anim.IsMotionComplete(MantleStateName);
 
-        // 종료 이벤트 전이면 입력과 상관없이 유지
+        hasMoveInput = playerController.InputHandler.Movement.sqrMagnitude > 0.01f;
+
         if (!windowOpened && !clipComplete)
-            return;
+            return false;
 
-        bool hasMoveInput =
-            playerController.InputHandler.Movement.sqrMagnitude > 0.01f;
-
-        // 종료 구간 안에서는 입력이 있을 때만 즉시 전환,
-        // 입력이 없으면 클립 끝까지 대기
         if (!clipComplete && !hasMoveInput)
-            return;
+            return false;
 
-        FinishMantle(hasMoveInput);
+        return true;
     }
 
     // ---------- 종료 ----------
 
     private void FinishMantle(bool hasMoveInput)
     {
-        if (isFinishing)
-            return;
+        if (isFinishing) return;
 
         isFinishing = true;
 
@@ -220,8 +228,6 @@ public class PlayerMantleState : PlayerParkourState
 
         if (!isGrounded)
         {
-            Debug.Log("[Mantle] Exit -> Fall");
-
             playerStateMachine.ChangeState(
                 new PlayerFallState(
                     playerController,
@@ -250,8 +256,6 @@ public class PlayerMantleState : PlayerParkourState
             playerController.MovementController
                 .SetHorizontalVelocity(forward * speed);
 
-            Debug.Log($"[Mantle] Exit -> Move (속도 인계 {speed:F2} m/s)");
-
             playerStateMachine.ChangeState(
                 new PlayerMoveState(
                     playerController,
@@ -261,8 +265,6 @@ public class PlayerMantleState : PlayerParkourState
         {
             playerController.MovementController
                 .SetHorizontalVelocity(Vector3.zero);
-
-            Debug.Log("[Mantle] Exit -> Idle");
 
             playerStateMachine.ChangeState(
                 new PlayerIdleState(
@@ -297,12 +299,8 @@ public class PlayerMantleState : PlayerParkourState
 
         CharacterController cc = playerController.CharacterController;
 
-        float bottomY = cc.bounds.min.y;
-        // 변경 후
+        // 피벗(발 기준) 높이를 윗면에 맞춘다.
         float delta = topY - cc.transform.position.y;
-
-        Debug.Log($"[Mantle] 윗면 {topY:F3} / 캡슐 바닥 {bottomY:F3} / 보정 {delta:F3}");
-        LogFinishDebug(topY);
 
         if (Mathf.Abs(delta) > MaxSnapDistance)
         {
@@ -313,56 +311,13 @@ public class PlayerMantleState : PlayerParkourState
         cc.Move(Vector3.up * delta);
     }
 
-    /// <summary>
-    /// 캐릭터 발 파묻힘 문제 디버깅용 로그. Mantle 종료 직전에 호출한다.
-    /// </summary>
-    /// <param name="topY"></param>
-    private void LogFinishDebug(float topY)
-    {
-        Transform player = playerController.transform;
-        CharacterController cc = playerController.CharacterController;
-        Animator animator =
-            playerController.PlayerAnimationController.GetComponent<Animator>();
-
-        float pivotY = player.position.y;
-        float capsuleBottom = cc.bounds.min.y;
-
-        string along = "n/a";
-        if (obstacle != null && obstacle.StartPoint != null)
-        {
-            Vector3 fwd = obstacle.StartPoint.forward;
-            fwd.y = 0f;
-            fwd.Normalize();
-
-            Vector3 d = player.position - obstacle.StartPoint.position;
-            d.y = 0f;
-
-            along = Vector3.Dot(d, fwd).ToString("F3");
-        }
-
-        string toes = "n/a";
-        if (animator != null)
-        {
-            Transform l = animator.GetBoneTransform(HumanBodyBones.LeftToes);
-            Transform r = animator.GetBoneTransform(HumanBodyBones.RightToes);
-
-            if (l != null && r != null)
-                toes = $"L {l.position.y:F3} / R {r.position.y:F3}";
-        }
-
-        Debug.Log(
-            $"[Mantle] 진단 | 피벗Y {pivotY:F3} / 캡슐바닥 {capsuleBottom:F3} / " +
-            $"StartPoint 기준 전진 {along}m / 발끝Y {toes} / 윗면 {topY:F3}");
-    }
-
     public override void Exit()
     {
         // 어떤 경로로 빠져나가든 반드시 충돌 복구
         SetObstacleCollision(false);
 
         playerController.PlayerAnimationController.ResetParkourExitWindow();
-
-        Debug.Log("[Mantle] Exit");
+        playerController.PlayerAnimationController.SkipNextRootMotion = false;
     }
 
     private void SetObstacleCollision(bool ignore)

@@ -25,6 +25,9 @@ public class PlayerAnimationController : MonoBehaviour
     // 마지막 프레임의 루트모션 속도 (파쿠르 종료 시 MovementController에 인계)
     public Vector3 RootMotionVelocity { get; private set; }
 
+    // 상태 전환 첫 프레임의 루트모션 1회를 버린다 (실제 로직, 제거 금지
+    public bool SkipNextRootMotion;
+
     private void Reset()
     {
         characterController = GetComponent<CharacterController>();
@@ -67,16 +70,20 @@ public class PlayerAnimationController : MonoBehaviour
         SetGrounded(groundDetector.IsGrounded);
     }
 
-    // 추가: Vault 중 Root Motion 전달
+    // Vault 중 Root Motion 전달
     private void OnAnimatorMove()
     {
         if (animator == null) return;
 
-        // 추가: 이번 프레임 루트모션 속도 기록
-        RootMotionVelocity = Time.deltaTime > 0f
-            ? animator.deltaPosition / Time.deltaTime
-            : Vector3.zero;
+        // 프레임 루트모션 속도 기록
+        RootMotionVelocity = Time.deltaTime > 0f ? animator.deltaPosition / Time.deltaTime : Vector3.zero;
 
+        if (SkipNextRootMotion)
+        {
+            SkipNextRootMotion = false;
+            RootMotionVelocity = Vector3.zero;
+            return;
+        }
 
         if (playerController == null || !playerController.IsParkourActive)
         {
@@ -99,9 +106,8 @@ public class PlayerAnimationController : MonoBehaviour
             return;
         }
 
-        float normalizedSpeed =
-            movementController.CurrentHorizontalSpeed /
-            movementController.RunSpeed;
+        float normalizedSpeed = 
+            movementController.CurrentHorizontalSpeed / movementController.RunSpeed;
 
         normalizedSpeed = Mathf.Clamp01(normalizedSpeed);
 
@@ -112,11 +118,7 @@ public class PlayerAnimationController : MonoBehaviour
     {
         if (animator == null) return;
 
-        animator.SetFloat(
-            SpeedHash,
-            value,
-            0.05f,
-            Time.deltaTime);
+        animator.SetFloat(SpeedHash, value, 0.05f, Time.deltaTime);
     }
 
     public PlayerMotion CurrentMotion { get; private set; }
@@ -127,9 +129,7 @@ public class PlayerAnimationController : MonoBehaviour
 
         if (animator == null) return;
 
-        animator.SetInteger(
-            MotionStateHash,
-            (int)motion);
+        animator.SetInteger(MotionStateHash, (int)motion);
     }
 
     // 지정한 Animator State의 애니메이션 재생 완료 여부 확인
@@ -210,7 +210,7 @@ public class PlayerAnimationController : MonoBehaviour
     public void OnParkourExitWindow()
     {
         ParkourExitWindowOpened = true;
-        Debug.Log("[Anim] ParkourExitWindow");
+       // Debug.Log("[Anim] ParkourExitWindow");
     }
 
     public void ResetParkourExitWindow()
