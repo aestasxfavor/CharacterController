@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 53
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5de3af8fe2a3a84283d4e1f973d038e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: EmpathyHierarchy.Editor::EmpathyHierarchy.EHSettings
+  enabled: 1
+  rowRadius: 5
+  rightPadding: 0
+  boldRootObjects: 0
+  componentAwareIcons: 1
+  stripedRows: 1
+  stripeStrength: 0.035
+  treeLines: 1
+  treeLineColor: {r: 0.55, g: 0.55, b: 0.55, a: 0.55}
+  treeLineThickness: 1
+  branchColoredLines: 1
+  treeLineOffset: 0
+  childColors: 1
+  childTintAlpha: 0.22
+  childTintFade: 0.7
+  accentBar: 0
+  rootOutline: 1
+  extendRootRows: 0
+  arrowTint: 1
+  outlineFullWidth: 0
+  arrowBadges: 1
+  brightArrows: 1
+  outlineColor: {r: 0.55, g: 0.55, b: 0.55, a: 0.8}
+  separatorPrefixes: ---,===,//
+  separatorAlign: 2
+  separatorOutline: 1
+  separatorsEditorOnly: 1
+  navBar: 1
+  navBarMode: 0
+  navNumberShortcuts: 1
+  navStarOnRows: 1
+  bookmarkChipSize: 22
+  tagLayerStyle: 2
+  showDefaultTagLayer: 1
+  tagLayerMaxWidth: 120
+  tagColors: []
+  layerColors: []
+  globalSaturation: 1
+  globalBrightness: 1
+  globalOpacity: 1
+  customIcons: []
+  hiddenIcons: []
+  recommendedAdded: []
+  recommendedRemoved: []
+  sceneSelector: 1
+  favoriteScenes:
+  - 192bd100177af7840b02850e335c17cb
+  childCountBadge: 0
+  childCountMode: 1
+  badgeMode: 1
+  badgeColor: {r: 0.36, g: 0.43, b: 0.58, a: 1}
+  activeToggle: 1
+  activeToggleStyle: 0
+  activeToggleColorMode: 1
+  toggleOnColor: {r: 0.24, g: 0.73, b: 0.42, a: 1}
+  defaultsMode: legacy:3

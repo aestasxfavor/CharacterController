@@ -1,0 +1,613 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 53
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54b53bec93e3ecd40afd8ceb6a05f821, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: EmpathyHierarchy.Editor::EmpathyHierarchy.EHRules
+  seeded: 1
+  presetVersion: 6
+  activeSet: 2
+  builtInFill: 1
+  customFill: 0
+  nested: 3
+  custom: []
+  component:
+  - id: d9780c03c67a49e48f03000fed71407b
+    name: Cameras
+    enabled: 1
+    group: 1
+    names: 
+    nameMatch: 1
+    components: Camera, Cinemachine*
+    paletteSlot: 5
+    paletteSlot2: 1
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.54509807, g: 0.3529412, b: 0.56078434, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.49411765, g: 0.6039216, b: 0.38431373, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/processed/unityengine/d_camera icon.asset
+      align: 0
+      iconDarken: 0
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 5c14caf291144c71b9649fb0f9af50ad
+    name: Lights
+    enabled: 1
+    group: 1
+    names: 
+    nameMatch: 1
+    components: Light, ReflectionProbe, LightProbeGroup
+    paletteSlot: 6
+    paletteSlot2: 2
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.6039216, g: 0.5568628, b: 0.50980395, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.83137256, g: 0.65882355, b: 0.29411766, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/processed/unityengine/d_light icon.asset
+      align: 0
+      iconDarken: 0
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 4234d1debd9a4ffb991aabfa45278334
+    name: Post / Volume
+    enabled: 1
+    group: 1
+    names: 
+    nameMatch: 1
+    components: Volume, PostProcessVolume
+    paletteSlot: 0
+    paletteSlot2: 5
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.43529412, g: 0.56078434, b: 0.6862745, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.54509807, g: 0.3529412, b: 0.56078434, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/d_pretexturergb.png
+      align: 0
+      iconDarken: 0
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: f517db15755f4a628ba9f11676ad8e6a
+    name: UI
+    enabled: 1
+    group: 1
+    names: 
+    nameMatch: 1
+    components: Canvas, EventSystem
+    paletteSlot: 3
+    paletteSlot2: 1
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.78039217, g: 0.47843137, b: 0.27058825, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.49411765, g: 0.6039216, b: 0.38431373, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/processed/unityengine/guilayer icon.asset
+      align: 0
+      iconDarken: 0
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 67103d6cc9344487829afdc1b45e5041
+    name: Audio
+    enabled: 1
+    group: 1
+    names: 
+    nameMatch: 1
+    components: AudioSource, AudioReverbZone
+    paletteSlot: 5
+    paletteSlot2: 2
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.54509807, g: 0.3529412, b: 0.56078434, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.83137256, g: 0.65882355, b: 0.29411766, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/processed/unityengine/d_audiosource icon.asset
+      align: 0
+      iconDarken: 0
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 34245d2e496b4ac09a44c6aff6412cf9
+    name: VFX
+    enabled: 1
+    group: 1
+    names: 
+    nameMatch: 1
+    components: ParticleSystem, VisualEffect
+    paletteSlot: 4
+    paletteSlot2: 2
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.65882355, g: 0.28627452, b: 0.2901961, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.83137256, g: 0.65882355, b: 0.29411766, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/processed/unityengine/vfx/d_visualeffectasset icon.asset
+      align: 0
+      iconDarken: 0
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 90e59c6c17354ee7be054fc5515227b7
+    name: Timeline
+    enabled: 1
+    group: 1
+    names: 
+    nameMatch: 1
+    components: PlayableDirector
+    paletteSlot: 5
+    paletteSlot2: 0
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.54509807, g: 0.3529412, b: 0.56078434, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.43529412, g: 0.56078434, b: 0.6862745, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/d_unityeditor.timeline.timelinewindow.png
+      align: 0
+      iconDarken: 0
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: cb54d7bcbb0b4690a2ad1407ac13e9bd
+    name: Characters
+    enabled: 1
+    group: 1
+    names: 
+    nameMatch: 1
+    components: Animator, CharacterController
+    paletteSlot: 4
+    paletteSlot2: 0
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.65882355, g: 0.28627452, b: 0.2901961, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.43529412, g: 0.56078434, b: 0.6862745, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/processed/unityengine/d_avatar icon.asset
+      align: 0
+      iconDarken: 0
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 7bdb9330f7664cc8984dfe4a455b4b01
+    name: AI / Navigation
+    enabled: 1
+    group: 1
+    names: 
+    nameMatch: 1
+    components: NavMeshAgent, NavMeshSurface, NavMeshObstacle
+    paletteSlot: 6
+    paletteSlot2: 4
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.6039216, g: 0.5568628, b: 0.50980395, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.65882355, g: 0.28627452, b: 0.2901961, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/processed/unityengine/ai/d_navmeshdata icon.asset
+      align: 0
+      iconDarken: 0
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 4af750f8f5074a058b0c7555ce578709
+    name: Environment
+    enabled: 1
+    group: 1
+    names: 
+    nameMatch: 1
+    components: Terrain, WindZone
+    paletteSlot: 0
+    paletteSlot2: 1
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.43529412, g: 0.56078434, b: 0.6862745, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.49411765, g: 0.6039216, b: 0.38431373, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/d_tree_icon_leaf.png
+      align: 0
+      iconDarken: 0
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  naming:
+  - id: a3b4a58715c2404ba525e1575526ded9
+    name: Managers & Systems
+    enabled: 1
+    group: 2
+    names: Manager, System, Controller, Service, Bootstrap, Network
+    nameMatch: 1
+    components: 
+    paletteSlot: 4
+    paletteSlot2: 3
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.65882355, g: 0.28627452, b: 0.2901961, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.78039217, g: 0.47843137, b: 0.27058825, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/processed/d_settings icon.asset
+      align: 0
+      iconDarken: 1
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 24512aeabe734524842271c9dee5d9f7
+    name: Cameras
+    enabled: 1
+    group: 2
+    names: Camera, Cinemachine
+    nameMatch: 1
+    components: 
+    paletteSlot: 0
+    paletteSlot2: 1
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.43529412, g: 0.56078434, b: 0.6862745, a: 1}
+      fill: 1
+      gradient: 1
+      color2: {r: 0.49411765, g: 0.6039216, b: 0.38431373, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/processed/unityengine/d_camera icon.asset
+      align: 0
+      iconDarken: 1
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 9f0cdf3c14df44b4860bcf3bcd113bb1
+    name: Lighting
+    enabled: 1
+    group: 2
+    names: Light, Probe, PostProcess, Volume, Sky
+    nameMatch: 1
+    components: 
+    paletteSlot: 2
+    paletteSlot2: 3
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.83137256, g: 0.65882355, b: 0.29411766, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.78039217, g: 0.47843137, b: 0.27058825, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/processed/unityengine/d_light icon.asset
+      align: 0
+      iconDarken: 1
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: c932a16988634fe38478107fca48d8a2
+    name: Environment / Level
+    enabled: 1
+    group: 2
+    names: Environment, Level, World, Stage, Terrain, Props, Geometry, Scenery, Background,
+      Foliage
+    nameMatch: 1
+    components: 
+    paletteSlot: 1
+    paletteSlot2: 0
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.49411765, g: 0.6039216, b: 0.38431373, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.43529412, g: 0.56078434, b: 0.6862745, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/d_tree_icon.png
+      align: 0
+      iconDarken: 1
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 04221a0053674e66baea85953915c4f6
+    name: Gameplay
+    enabled: 1
+    group: 2
+    names: Gameplay, Player, Character, Enemy, NPC, Interactable, Pickup, Weapon,
+      Vehicle
+    nameMatch: 1
+    components: 
+    paletteSlot: 3
+    paletteSlot2: 5
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.78039217, g: 0.47843137, b: 0.27058825, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.54509807, g: 0.3529412, b: 0.56078434, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/d_unityeditor.gameview.png
+      align: 0
+      iconDarken: 1
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 70bd9fa8a1d04f7195d578abfd01d516
+    name: Spawns & Markers
+    enabled: 1
+    group: 2
+    names: Spawn, Waypoint, Checkpoint, Trigger, Marker, NavMesh
+    nameMatch: 1
+    components: 
+    paletteSlot: 0
+    paletteSlot2: 2
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.43529412, g: 0.56078434, b: 0.6862745, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.83137256, g: 0.65882355, b: 0.29411766, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/packagemanager/light/download-available-selected-focused.png
+      align: 0
+      iconDarken: 1
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: b17fd624f12f4436a2661aedb9694a66
+    name: UI
+    enabled: 1
+    group: 2
+    names: HUD, Canvas, Menu, Interface, Popup
+    nameMatch: 1
+    components: 
+    paletteSlot: 5
+    paletteSlot2: 3
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.54509807, g: 0.3529412, b: 0.56078434, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.78039217, g: 0.47843137, b: 0.27058825, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/d_leftpanel.png
+      align: 0
+      iconDarken: 1
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 3543e0874e8848f3b1eca157d190bcae
+    name: Audio
+    enabled: 1
+    group: 2
+    names: Audio, Sound, Music, SFX, BGM, Ambience
+    nameMatch: 1
+    components: 
+    paletteSlot: 5
+    paletteSlot2: 0
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.54509807, g: 0.3529412, b: 0.56078434, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.43529412, g: 0.56078434, b: 0.6862745, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/processed/unityengine/d_audiosource icon.asset
+      align: 0
+      iconDarken: 1
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 6c979ceeb0d04254ac912cc06200be2e
+    name: VFX
+    enabled: 1
+    group: 2
+    names: VFX, Effect, Particle
+    nameMatch: 1
+    components: 
+    paletteSlot: 4
+    paletteSlot2: 2
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.65882355, g: 0.28627452, b: 0.2901961, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.83137256, g: 0.65882355, b: 0.29411766, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/processed/unityengine/vfx/d_visualeffectasset icon.asset
+      align: 0
+      iconDarken: 0.981
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 30cf256bedd842fb8154ff8c4fc78480
+    name: Timeline / Cutscene
+    enabled: 1
+    group: 2
+    names: Timeline, Cutscene, Cinematic
+    nameMatch: 1
+    components: 
+    paletteSlot: 5
+    paletteSlot2: 2
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.54509807, g: 0.3529412, b: 0.56078434, a: 1}
+      fill: 1
+      gradient: 2
+      color2: {r: 0.83137256, g: 0.65882355, b: 0.29411766, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/d_unityeditor.timeline.timelinewindow.png
+      align: 0
+      iconDarken: 1
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
+  - id: 208096acbfd94a41a277171dcdf860ea
+    name: Debug / Test
+    enabled: 1
+    group: 2
+    names: Debug, Test, Sandbox, WIP
+    nameMatch: 1
+    components: 
+    paletteSlot: 6
+    paletteSlot2: 5
+    style:
+      id: 
+      hasColor: 1
+      color: {r: 0.6039216, g: 0.5568628, b: 0.50980395, a: 1}
+      fill: 1
+      gradient: 1
+      color2: {r: 0.54509807, g: 0.3529412, b: 0.56078434, a: 1}
+      bold: 1
+      tintChildren: 1
+      iconMode: 2
+      icon: res:icons/toolbars/debug on.png
+      align: 0
+      iconDarken: 1
+      useGlobalSaturation: 1
+      saturation: 1
+      useGlobalBrightness: 1
+      brightness: 1
+      useGlobalOpacity: 1
+      opacity: 1
